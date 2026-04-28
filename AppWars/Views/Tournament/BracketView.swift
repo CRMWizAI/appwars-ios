@@ -1,36 +1,17 @@
 import SwiftUI
 import Kingfisher
 
+/// Pre-computes all bracket data ONCE, then renders a static image + positioned avatars.
 struct BracketView: View {
     let matchups: [Matchup]
     let tournament: Tournament
 
-    static let COL = Color(red: 212/255, green: 168/255, blue: 11/255)
-    static let LW: CGFloat = 2.5
-    static let SLOT_W: CGFloat = 80
-    static let U_HEIGHT: CGFloat = 42
-    static let STEM: CGFloat = 36
-    static let PAD: CGFloat = 44
-    static let CENTER_GAP: CGFloat = 70
-    static let AVATAR_SIZE: CGFloat = 38
-
-    // Pre-computed on init — NOT in body
-    @State private var avatarPositions: [AvatarPos] = []
-    @State private var didCompute = false
-
-    var totalRounds: Int {
-        tournament.totalRounds ?? max(1, Int(ceil(log2(Double(max(matchups.count * 2, 2))))))
-    }
-    var playerCount: Int { Int(pow(2, Double(totalRounds))) }
-    var halfPlayers: Int { playerCount / 2 }
-    var halfRounds: Int { Int(log2(Double(max(halfPlayers, 2)))) }
-    var totalW: CGFloat { CGFloat(halfPlayers) * Self.SLOT_W }
-    var roundH: CGFloat { Self.U_HEIGHT + Self.STEM }
-    var halfH: CGFloat { CGFloat(halfRounds) * roundH + Self.PAD }
-    var totalH: CGFloat { halfH * 2 + Self.CENTER_GAP }
+    @State private var bracketData: BracketData?
 
     var body: some View {
-        if matchups.isEmpty {
+        if let data = bracketData {
+            BracketRenderer(data: data, matchups: matchups)
+        } else if matchups.isEmpty {
             VStack(spacing: 16) {
                 Image(systemName: "trophy")
                     .font(.system(size: 44))
@@ -40,78 +21,35 @@ struct BracketView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            let screenWidth = UIScreen.main.bounds.width
-            let scale = min(1, screenWidth / totalW)
-
-            ScrollView([.vertical, .horizontal], showsIndicators: false) {
-                ZStack(alignment: .topLeading) {
-                    // Canvas: golden bracket lines
-                    Canvas { ctx, size in
-                        drawBracket(ctx: ctx)
-                    }
-                    .frame(width: totalW, height: totalH)
-
-                    // Avatar overlay — uses stable pre-computed IDs
-                    ForEach(avatarPositions) { pos in
-                        AvatarDot(
-                            username: pos.username,
-                            avatarUrl: pos.avatarUrl,
-                            size: Self.AVATAR_SIZE,
-                            matchup: findMatchup(pos.matchupId)
-                        )
-                        .position(x: pos.x, y: pos.y)
-                    }
-
-                    // Champion
-                    if let finals = finalsMatchup, let winnerName = finals.winnerUsername {
-                        let cx = totalW / 2
-                        let cy = halfH + Self.CENTER_GAP / 2
-                        let winnerAvatar = finals.winnerId == finals.participantAId
-                            ? finals.participantAScreenshotUrl
-                            : finals.participantBScreenshotUrl
-
-                        ChampionNode(
-                            username: winnerName,
-                            avatarUrl: winnerAvatar,
-                            size: Self.AVATAR_SIZE + 14
-                        )
-                        .position(x: cx, y: cy)
-                    }
-                }
-                .frame(width: totalW, height: totalH)
-                .scaleEffect(scale, anchor: .topLeading)
-                .frame(width: totalW * scale, height: totalH * scale)
-            }
-            .onAppear {
-                if !didCompute {
-                    avatarPositions = buildAvatarPositions()
-                    didCompute = true
-                }
-            }
+            ProgressView().tint(.yellow)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .onAppear { bracketData = BracketData.compute(matchups: matchups, tournament: tournament) }
         }
     }
+}
 
-    func findMatchup(_ id: UUID?) -> Matchup? {
-        guard let id = id else { return nil }
-        return matchups.first { $0.id == id }
-    }
+// MARK: - All bracket math computed once, stored as a plain struct
+struct BracketData {
+    static let SLOT_W: CGFloat = 80
+    static let U_HEIGHT: CGFloat = 42
+    static let STEM: CGFloat = 36
+    static let PAD: CGFloat = 44
+    static let CENTER_GAP: CGFloat = 70
+    static let AVATAR_SIZE: CGFloat = 38
 
-    var finalsMatchup: Matchup? {
-        let br = Dictionary(grouping: matchups, by: \.round)
-        return br[totalRounds]?.first
-    }
+    let totalW: CGFloat
+    let totalH: CGFloat
+    let halfH: CGFloat
+    let halfRounds: Int
+    let halfPlayers: Int
+    let totalRounds: Int
+    let scale: CGFloat
+    let avatars: [AvatarPos]
+    let champion: ChampionInfo?
+    let lines: [BracketLine]
 
-    func matchCx(_ r: Int, _ i: Int) -> CGFloat {
-        (CGFloat(i) + 0.5) * pow(2, CGFloat(r + 1)) * Self.SLOT_W
-    }
-
-    func armOff(_ r: Int) -> CGFloat {
-        pow(2, CGFloat(r)) * Self.SLOT_W / 2
-    }
-
-    // MARK: - Stable avatar position struct
     struct AvatarPos: Identifiable {
-        let id: String // stable string ID, NOT random UUID
+        let id: String
         let x: CGFloat
         let y: CGFloat
         let username: String?
@@ -119,88 +57,142 @@ struct BracketView: View {
         let matchupId: UUID?
     }
 
-    // MARK: - Build positions ONCE (not in body)
-    func buildAvatarPositions() -> [AvatarPos] {
-        var positions: [AvatarPos] = []
+    struct ChampionInfo {
+        let x: CGFloat
+        let y: CGFloat
+        let username: String
+        let avatarUrl: String?
+    }
+
+    struct BracketLine {
+        let from: CGPoint
+        let to: CGPoint
+    }
+
+    static func compute(matchups: [Matchup], tournament: Tournament) -> BracketData {
+        let totalRounds = tournament.totalRounds ?? max(1, Int(ceil(log2(Double(max(matchups.count * 2, 2))))))
+        let playerCount = Int(pow(2, Double(totalRounds)))
+        let halfPlayers = playerCount / 2
+        let halfRounds = Int(log2(Double(max(halfPlayers, 2))))
+        let totalW = CGFloat(halfPlayers) * SLOT_W
+        let roundH = U_HEIGHT + STEM
+        let halfH = CGFloat(halfRounds) * roundH + PAD
+        let totalH = halfH * 2 + CENTER_GAP
+        let screenWidth = UIScreen.main.bounds.width
+        let scale = min(1, screenWidth / totalW)
+
         let br = Dictionary(grouping: matchups, by: \.round)
             .mapValues { $0.sorted { ($0.bracketPosition ?? 0) < ($1.bracketPosition ?? 0) } }
 
+        // Build halves
         var topHalf: [[Matchup]] = []
         var bottomHalf: [[Matchup]] = []
         for r in 1...totalRounds {
-            let roundMatchups = br[r] ?? []
+            let rm = br[r] ?? []
             let expected = Int(pow(2, Double(totalRounds - r)))
             let topCount = Int(ceil(Double(expected) / 2.0))
-            topHalf.append(Array(roundMatchups.prefix(topCount)))
-            bottomHalf.append(Array(roundMatchups.dropFirst(topCount).prefix(expected - topCount)))
+            topHalf.append(Array(rm.prefix(topCount)))
+            bottomHalf.append(Array(rm.dropFirst(topCount).prefix(expected - topCount)))
         }
 
         let finals = br[totalRounds]?.first
 
-        func computeHalf(_ halfData: [[Matchup]], dir: CGFloat, prefix: String) {
-            var armY = dir == 1 ? Self.PAD : totalH - Self.PAD
+        // Compute lines
+        var lines: [BracketLine] = []
+        func addLine(_ fx: CGFloat, _ fy: CGFloat, _ tx: CGFloat, _ ty: CGFloat) {
+            lines.append(BracketLine(from: CGPoint(x: fx, y: fy), to: CGPoint(x: tx, y: ty)))
+        }
 
+        func matchCx(_ r: Int, _ i: Int) -> CGFloat {
+            (CGFloat(i) + 0.5) * pow(2, CGFloat(r + 1)) * SLOT_W
+        }
+        func armOff(_ r: Int) -> CGFloat {
+            pow(2, CGFloat(r)) * SLOT_W / 2
+        }
+
+        func drawHalfLines(yStart: CGFloat, dir: CGFloat) {
+            var armY = yStart
             for r in 0..<halfRounds {
                 let numMatches = halfPlayers / Int(pow(2, Double(r + 1)))
                 let off = armOff(r)
-                let barY = armY + dir * Self.U_HEIGHT
-                let stemEnd = barY + dir * Self.STEM
+                let barY = armY + dir * U_HEIGHT
+                let stemEnd = barY + dir * STEM
+                for i in 0..<numMatches {
+                    let cx = matchCx(r, i)
+                    let lx = cx - off
+                    let rx = cx + off
+                    let armStart = r == 0 ? armY + dir * 8 : armY
+                    addLine(lx, armStart, lx, barY)
+                    addLine(rx, armStart, rx, barY)
+                    addLine(lx, barY, rx, barY)
+                    addLine(cx, barY, cx, stemEnd)
+                }
+                armY = stemEnd
+            }
+        }
+        drawHalfLines(yStart: PAD, dir: 1)
+        drawHalfLines(yStart: totalH - PAD, dir: -1)
+        addLine(totalW / 2, halfH, totalW / 2, totalH - halfH)
+
+        // Compute avatar positions
+        var avatars: [AvatarPos] = []
+
+        func computeHalfAvatars(_ halfData: [[Matchup]], dir: CGFloat, prefix: String) {
+            var armY = dir == 1 ? PAD : totalH - PAD
+            for r in 0..<halfRounds {
+                let numMatches = halfPlayers / Int(pow(2, Double(r + 1)))
+                let off = armOff(r)
+                let barY = armY + dir * U_HEIGHT
+                let stemEnd = barY + dir * STEM
                 let roundData = r < halfData.count ? halfData[r] : []
 
                 for i in 0..<numMatches {
                     let cx = matchCx(r, i)
                     let lx = cx - off
                     let rx = cx + off
-                    let matchup = i < roundData.count ? roundData[i] : nil
-
-                    let isCompleted = matchup?.status == "completed" && matchup?.winnerId != nil
-                    let aIsWinner = isCompleted && matchup?.winnerId == matchup?.participantAId
-                    let bIsWinner = isCompleted && matchup?.winnerId == matchup?.participantBId
+                    let m = i < roundData.count ? roundData[i] : nil
+                    let done = m?.status == "completed" && m?.winnerId != nil
+                    let aWin = done && m?.winnerId == m?.participantAId
+                    let bWin = done && m?.winnerId == m?.participantBId
 
                     if r == 0 {
-                        if !aIsWinner {
-                            positions.append(AvatarPos(id: "\(prefix)_r\(r)_m\(i)_a", x: lx, y: armY, username: matchup?.participantAUsername, avatarUrl: matchup?.participantAScreenshotUrl, matchupId: matchup?.id))
+                        if !aWin {
+                            avatars.append(.init(id: "\(prefix)_r\(r)_m\(i)_a", x: lx, y: armY, username: m?.participantAUsername, avatarUrl: m?.participantAScreenshotUrl, matchupId: m?.id))
                         }
-                        if matchup?.isBye != true && !bIsWinner {
-                            positions.append(AvatarPos(id: "\(prefix)_r\(r)_m\(i)_b", x: rx, y: armY, username: matchup?.participantBUsername, avatarUrl: matchup?.participantBScreenshotUrl, matchupId: matchup?.id))
+                        if m?.isBye != true && !bWin {
+                            avatars.append(.init(id: "\(prefix)_r\(r)_m\(i)_b", x: rx, y: armY, username: m?.participantBUsername, avatarUrl: m?.participantBScreenshotUrl, matchupId: m?.id))
                         }
                     } else {
-                        let nudgedArmY = armY - dir * (Self.AVATAR_SIZE / 2 + 2)
-                        if isCompleted {
-                            let loserIsA = !aIsWinner
-                            positions.append(AvatarPos(id: "\(prefix)_r\(r)_m\(i)_loser", x: loserIsA ? lx : rx, y: nudgedArmY,
-                                username: loserIsA ? matchup?.participantAUsername : matchup?.participantBUsername,
-                                avatarUrl: loserIsA ? matchup?.participantAScreenshotUrl : matchup?.participantBScreenshotUrl,
-                                matchupId: matchup?.id))
+                        let ny = armY - dir * (AVATAR_SIZE / 2 + 2)
+                        if done {
+                            let la = !aWin
+                            avatars.append(.init(id: "\(prefix)_r\(r)_m\(i)_l", x: la ? lx : rx, y: ny,
+                                username: la ? m?.participantAUsername : m?.participantBUsername,
+                                avatarUrl: la ? m?.participantAScreenshotUrl : m?.participantBScreenshotUrl, matchupId: m?.id))
                         } else {
-                            if matchup?.participantAId != nil {
-                                positions.append(AvatarPos(id: "\(prefix)_r\(r)_m\(i)_pa", x: lx, y: nudgedArmY, username: matchup?.participantAUsername, avatarUrl: matchup?.participantAScreenshotUrl, matchupId: matchup?.id))
+                            if m?.participantAId != nil {
+                                avatars.append(.init(id: "\(prefix)_r\(r)_m\(i)_a", x: lx, y: ny, username: m?.participantAUsername, avatarUrl: m?.participantAScreenshotUrl, matchupId: m?.id))
                             }
-                            if matchup?.participantBId != nil {
-                                positions.append(AvatarPos(id: "\(prefix)_r\(r)_m\(i)_pb", x: rx, y: nudgedArmY, username: matchup?.participantBUsername, avatarUrl: matchup?.participantBScreenshotUrl, matchupId: matchup?.id))
+                            if m?.participantBId != nil {
+                                avatars.append(.init(id: "\(prefix)_r\(r)_m\(i)_b", x: rx, y: ny, username: m?.participantBUsername, avatarUrl: m?.participantBScreenshotUrl, matchupId: m?.id))
                             }
                         }
                     }
 
-                    if let winnerId = matchup?.winnerId {
-                        var advancedFurther = false
-                        if r + 1 < halfData.count {
-                            let nextMatchIdx = i / 2
-                            if nextMatchIdx < halfData[r + 1].count {
-                                let next = halfData[r + 1][nextMatchIdx]
-                                advancedFurther = next.participantAId == winnerId || next.participantBId == winnerId
-                            }
+                    if let wid = m?.winnerId {
+                        var adv = false
+                        if r + 1 < halfData.count, i / 2 < halfData[r + 1].count {
+                            let n = halfData[r + 1][i / 2]
+                            adv = n.participantAId == wid || n.participantBId == wid
                         } else if r == halfRounds - 1, let f = finals {
-                            advancedFurther = f.participantAId == winnerId || f.participantBId == winnerId
+                            adv = f.participantAId == wid || f.participantBId == wid
                         }
-
-                        if !advancedFurther {
-                            let nudgedY = stemEnd - dir * (Self.AVATAR_SIZE / 2 + 2)
-                            let isA = winnerId == matchup?.participantAId
-                            positions.append(AvatarPos(id: "\(prefix)_r\(r)_m\(i)_winner", x: cx, y: nudgedY,
-                                username: isA ? matchup?.participantAUsername : matchup?.participantBUsername,
-                                avatarUrl: isA ? matchup?.participantAScreenshotUrl : matchup?.participantBScreenshotUrl,
-                                matchupId: matchup?.id))
+                        if !adv {
+                            let ny = stemEnd - dir * (AVATAR_SIZE / 2 + 2)
+                            let isA = wid == m?.participantAId
+                            avatars.append(.init(id: "\(prefix)_r\(r)_m\(i)_w", x: cx, y: ny,
+                                username: isA ? m?.participantAUsername : m?.participantBUsername,
+                                avatarUrl: isA ? m?.participantAScreenshotUrl : m?.participantBScreenshotUrl, matchupId: m?.id))
                         }
                     }
                 }
@@ -208,111 +200,127 @@ struct BracketView: View {
             }
         }
 
-        computeHalf(topHalf, dir: 1, prefix: "top")
-        computeHalf(bottomHalf, dir: -1, prefix: "bot")
+        computeHalfAvatars(topHalf, dir: 1, prefix: "t")
+        computeHalfAvatars(bottomHalf, dir: -1, prefix: "b")
 
-        // Finals avatars
         if let f = finals {
             let cx = totalW / 2
-            let topY = halfH
-            let botY = totalH - halfH
-            let championId = f.winnerId
-
-            if f.participantAId != nil && f.participantAId != championId {
-                positions.append(AvatarPos(id: "finals_a", x: cx, y: topY - (Self.AVATAR_SIZE / 2 + 2), username: f.participantAUsername, avatarUrl: f.participantAScreenshotUrl, matchupId: f.id))
+            let cid = f.winnerId
+            if f.participantAId != nil && f.participantAId != cid {
+                avatars.append(.init(id: "f_a", x: cx, y: halfH - (AVATAR_SIZE / 2 + 2), username: f.participantAUsername, avatarUrl: f.participantAScreenshotUrl, matchupId: f.id))
             }
-            if f.participantBId != nil && f.participantBId != championId {
-                positions.append(AvatarPos(id: "finals_b", x: cx, y: botY + (Self.AVATAR_SIZE / 2 + 2), username: f.participantBUsername, avatarUrl: f.participantBScreenshotUrl, matchupId: f.id))
+            if f.participantBId != nil && f.participantBId != cid {
+                avatars.append(.init(id: "f_b", x: cx, y: totalH - halfH + (AVATAR_SIZE / 2 + 2), username: f.participantBUsername, avatarUrl: f.participantBScreenshotUrl, matchupId: f.id))
             }
         }
 
-        return positions
-    }
-
-    // MARK: - Draw bracket lines
-    func drawBracket(ctx: GraphicsContext) {
-        func drawHalf(yStart: CGFloat, dir: CGFloat) {
-            var armY = yStart
-            for r in 0..<halfRounds {
-                let numMatches = halfPlayers / Int(pow(2, Double(r + 1)))
-                let off = armOff(r)
-                let barY = armY + dir * Self.U_HEIGHT
-                let stemEnd = barY + dir * Self.STEM
-
-                for i in 0..<numMatches {
-                    let cx = matchCx(r, i)
-                    let lx = cx - off
-                    let rx = cx + off
-                    let armStart = r == 0 ? armY + dir * 8 : armY
-
-                    var p1 = Path(); p1.move(to: .init(x: lx, y: armStart)); p1.addLine(to: .init(x: lx, y: barY))
-                    ctx.stroke(p1, with: .color(Self.COL), lineWidth: Self.LW)
-                    var p2 = Path(); p2.move(to: .init(x: rx, y: armStart)); p2.addLine(to: .init(x: rx, y: barY))
-                    ctx.stroke(p2, with: .color(Self.COL), lineWidth: Self.LW)
-                    var p3 = Path(); p3.move(to: .init(x: lx, y: barY)); p3.addLine(to: .init(x: rx, y: barY))
-                    ctx.stroke(p3, with: .color(Self.COL), lineWidth: Self.LW)
-                    var p4 = Path(); p4.move(to: .init(x: cx, y: barY)); p4.addLine(to: .init(x: cx, y: stemEnd))
-                    ctx.stroke(p4, with: .color(Self.COL), lineWidth: Self.LW)
-                }
-                armY = stemEnd
-            }
+        // Champion
+        var champ: ChampionInfo? = nil
+        if let f = finals, let wn = f.winnerUsername {
+            let wa = f.winnerId == f.participantAId ? f.participantAScreenshotUrl : f.participantBScreenshotUrl
+            champ = ChampionInfo(x: totalW / 2, y: halfH + CENTER_GAP / 2, username: wn, avatarUrl: wa)
         }
 
-        drawHalf(yStart: Self.PAD, dir: 1)
-        drawHalf(yStart: totalH - Self.PAD, dir: -1)
-
-        let cx = totalW / 2
-        var center = Path()
-        center.move(to: .init(x: cx, y: halfH))
-        center.addLine(to: .init(x: cx, y: totalH - halfH))
-        ctx.stroke(center, with: .color(Self.COL), lineWidth: Self.LW)
+        return BracketData(totalW: totalW, totalH: totalH, halfH: halfH, halfRounds: halfRounds,
+                           halfPlayers: halfPlayers, totalRounds: totalRounds, scale: scale,
+                           avatars: avatars, champion: champ, lines: lines)
     }
 }
 
-// MARK: - Avatar Dot
-struct AvatarDot: View {
+// MARK: - Pure renderer — no computation in body
+struct BracketRenderer: View {
+    let data: BracketData
+    let matchups: [Matchup]
+
+    private static let gold = Color(red: 212/255, green: 168/255, blue: 11/255)
+
+    var body: some View {
+        ScrollView([.vertical, .horizontal], showsIndicators: false) {
+            ZStack(alignment: .topLeading) {
+                // Pre-computed lines drawn as shapes (no Canvas closure capturing self)
+                ForEach(Array(data.lines.enumerated()), id: \.offset) { _, line in
+                    Path { p in
+                        p.move(to: line.from)
+                        p.addLine(to: line.to)
+                    }
+                    .stroke(Self.gold, lineWidth: 2.5)
+                }
+
+                // Avatars
+                ForEach(data.avatars) { pos in
+                    StaticAvatarDot(
+                        username: pos.username,
+                        avatarUrl: pos.avatarUrl,
+                        size: BracketData.AVATAR_SIZE,
+                        matchupId: pos.matchupId,
+                        matchups: matchups
+                    )
+                    .position(x: pos.x, y: pos.y)
+                }
+
+                // Champion
+                if let c = data.champion {
+                    ChampionNode(username: c.username, avatarUrl: c.avatarUrl, size: BracketData.AVATAR_SIZE + 14)
+                        .position(x: c.x, y: c.y)
+                }
+            }
+            .frame(width: data.totalW, height: data.totalH)
+            .scaleEffect(data.scale, anchor: .topLeading)
+            .frame(width: data.totalW * data.scale, height: data.totalH * data.scale)
+        }
+    }
+}
+
+// MARK: - Static avatar (no closures, no computed lookups in body)
+struct StaticAvatarDot: View {
     let username: String?
     let avatarUrl: String?
     let size: CGFloat
-    let matchup: Matchup?
+    let matchupId: UUID?
+    let matchups: [Matchup]
 
-    @State private var showMatchup = false
+    @State private var showSheet = false
 
     var body: some View {
-        Button { if matchup != nil { showMatchup = true } } label: {
-            ZStack {
-                if let url = avatarUrl, let imageURL = URL(string: url) {
-                    KFImage(imageURL)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: size, height: size)
-                        .clipShape(Circle())
-                        .overlay(Circle().strokeBorder(Color.white.opacity(0.15), lineWidth: 1.5))
-                } else if let name = username {
-                    Circle()
-                        .fill(colorForName(name))
-                        .frame(width: size, height: size)
-                        .overlay(
-                            Text(String(name.prefix(2)).uppercased())
-                                .font(.system(size: size * 0.32, weight: .bold))
-                                .foregroundColor(.white)
-                        )
-                        .overlay(Circle().strokeBorder(Color.white.opacity(0.15), lineWidth: 1.5))
-                } else {
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: size, height: size)
-                        .overlay(Text("?").font(.system(size: size * 0.35)).foregroundColor(.gray))
-                }
-            }
+        Button { if matchupId != nil { showSheet = true } } label: {
+            avatarCircle
         }
         .buttonStyle(.plain)
-        .sheet(isPresented: $showMatchup) {
-            if let m = matchup { MatchupDetailSheet(matchup: m) }
+        .sheet(isPresented: $showSheet) {
+            if let mid = matchupId, let m = matchups.first(where: { $0.id == mid }) {
+                MatchupDetailSheet(matchup: m)
+            }
         }
     }
 
-    func colorForName(_ name: String) -> Color {
+    @ViewBuilder
+    var avatarCircle: some View {
+        if let url = avatarUrl, let imageURL = URL(string: url) {
+            KFImage(imageURL)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(Color.white.opacity(0.15), lineWidth: 1.5))
+        } else if let name = username {
+            Circle()
+                .fill(dotColor(name))
+                .frame(width: size, height: size)
+                .overlay(
+                    Text(String(name.prefix(2)).uppercased())
+                        .font(.system(size: size * 0.32, weight: .bold))
+                        .foregroundColor(.white)
+                )
+                .overlay(Circle().strokeBorder(Color.white.opacity(0.15), lineWidth: 1.5))
+        } else {
+            Circle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: size, height: size)
+                .overlay(Text("?").font(.system(size: size * 0.35)).foregroundColor(.gray))
+        }
+    }
+
+    func dotColor(_ name: String) -> Color {
         let colors: [Color] = [.purple, .blue, .green, .red, .orange, .cyan, .pink, .indigo, .teal, .mint]
         return colors[abs(name.hashValue) % colors.count]
     }
@@ -323,20 +331,21 @@ struct ChampionNode: View {
     let username: String
     let avatarUrl: String?
     let size: CGFloat
+    private static let gold = Color(red: 212/255, green: 168/255, blue: 11/255)
 
     var body: some View {
         VStack(spacing: 0) {
             Image(systemName: "crown.fill")
                 .font(.system(size: size * 0.45))
-                .foregroundStyle(BracketView.COL)
-                .shadow(color: BracketView.COL.opacity(0.8), radius: 6)
+                .foregroundStyle(Self.gold)
+                .shadow(color: Self.gold.opacity(0.8), radius: 6)
                 .offset(y: 6)
 
             ZStack {
                 Circle()
-                    .fill(BracketView.COL.opacity(0.15))
+                    .fill(Self.gold.opacity(0.15))
                     .frame(width: size + 8, height: size + 8)
-                    .shadow(color: BracketView.COL.opacity(0.6), radius: 20)
+                    .shadow(color: Self.gold.opacity(0.6), radius: 20)
 
                 if let url = avatarUrl, let imageURL = URL(string: url) {
                     KFImage(imageURL)
@@ -344,23 +353,23 @@ struct ChampionNode: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: size, height: size)
                         .clipShape(Circle())
-                        .overlay(Circle().strokeBorder(BracketView.COL, lineWidth: 2.5))
+                        .overlay(Circle().strokeBorder(Self.gold, lineWidth: 2.5))
                 } else {
                     Circle()
-                        .fill(colorForName(username))
+                        .fill(dotColor(username))
                         .frame(width: size, height: size)
                         .overlay(
                             Text(String(username.prefix(2)).uppercased())
                                 .font(.system(size: size * 0.34, weight: .bold))
                                 .foregroundColor(.white)
                         )
-                        .overlay(Circle().strokeBorder(BracketView.COL, lineWidth: 2.5))
+                        .overlay(Circle().strokeBorder(Self.gold, lineWidth: 2.5))
                 }
             }
         }
     }
 
-    func colorForName(_ name: String) -> Color {
+    func dotColor(_ name: String) -> Color {
         let colors: [Color] = [.purple, .blue, .green, .red, .orange, .cyan, .pink, .indigo, .teal, .mint]
         return colors[abs(name.hashValue) % colors.count]
     }
