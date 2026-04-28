@@ -55,23 +55,49 @@ struct TournamentDetailView: View {
                 .padding(16)
             }
 
-            // Tab picker
-            HStack(spacing: 0) {
-                TabButton(title: "Bracket", isSelected: selectedTab == 0) { selectedTab = 0 }
-                TabButton(title: "Chat", isSelected: selectedTab == 1) { selectedTab = 1 }
-                TabButton(title: "Info", isSelected: selectedTab == 2) { selectedTab = 2 }
+            // Round countdown
+            if let endDate = tournament.roundEndDate {
+                HStack {
+                    RoundCountdown(endDate: endDate)
+                    Spacer()
+                    if let cat = tournament.currentCategory {
+                        Text(cat)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 4)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+
+            // Tab picker
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    TabButton(title: "Bracket", isSelected: selectedTab == 0) { selectedTab = 0 }
+                    TabButton(title: "Vote Now", isSelected: selectedTab == 1) { selectedTab = 1 }
+                    TabButton(title: "Chat", isSelected: selectedTab == 2) { selectedTab = 2 }
+                    TabButton(title: "Sponsors", isSelected: selectedTab == 3) { selectedTab = 3 }
+                    TabButton(title: "Prizes", isSelected: selectedTab == 4) { selectedTab = 4 }
+                    TabButton(title: "Info", isSelected: selectedTab == 5) { selectedTab = 5 }
+                }
+                .padding(.horizontal, 16)
+            }
+            .padding(.top, 4)
 
             // Content
             TabView(selection: $selectedTab) {
                 BracketView(matchups: matchups, tournament: tournament)
                     .tag(0)
-                ChatTab(tournamentId: tournament.id)
+                VoteNowTab(tournament: tournament, matchups: matchups)
                     .tag(1)
-                InfoTab(tournament: tournament)
+                ChatTab(tournamentId: tournament.id)
                     .tag(2)
+                SponsorsTab(tournamentId: tournament.id)
+                    .tag(3)
+                PrizesTab(tournament: tournament)
+                    .tag(4)
+                InfoTab(tournament: tournament)
+                    .tag(5)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
