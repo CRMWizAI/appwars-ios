@@ -202,7 +202,7 @@ struct AvatarNode: View {
 
             Text(name.count > 8 ? String(name.prefix(7)) + "…" : name)
                 .font(.system(size: 9, weight: isWinner ? .bold : .medium))
-                .foregroundStyle(isEliminated ? .secondary.opacity(0.5) : .primary)
+                .foregroundColor(isEliminated ? .gray : .white)
                 .lineLimit(1)
         }
     }
