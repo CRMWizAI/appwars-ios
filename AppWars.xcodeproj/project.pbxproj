@@ -1,0 +1,548 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03C7C7B4DED184F89D5AF14E /* AppWarsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9536977EC242808356D96D31 /* AppWarsApp.swift */; };
+		1215068A89C9CA4D473F2F24 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93075731F15B5B68085CBD79 /* LoginView.swift */; };
+		1305F29FF5E1B3191B92FA1F /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ED3083C584BE42BCE233528 /* AuthService.swift */; };
+		19C2EC3DA4131C60FEE3043E /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988E67161AAB1C1C8D4FF0DE /* ProfileView.swift */; };
+		1E96CA4E6037865700565E2B /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = A9568D2957B6984D68D2AFED /* ConfettiSwiftUI */; };
+		1F30F2AB7553C38684ED035E /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DB247DBA055B207ED94510 /* MainTabView.swift */; };
+		36F59CD7EC2FA8314AC56E57 /* NotificationBellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B4B1CD707BFC8C5532F417 /* NotificationBellView.swift */; };
+		3878043704102CBDC8CF3CBC /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE8768C75BE74DCAFB06C544 /* Models.swift */; };
+		3A80D48E429D6F68A5B4B4F8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = FE87FC919BACDB02644C9A2B /* Kingfisher */; };
+		4A7440377221DC1B773A04B5 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2219E08B9F9447104C2DF26A /* LeaderboardView.swift */; };
+		84DEBFE9EC36D143E7710696 /* ShimmerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */; };
+		97CAE3D9D8417BC60C89FF93 /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 508C501BE801948404A5489D /* SupabaseClient.swift */; };
+		B0D8D92249D0D0C702432D6D /* PortfolioManageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822C686F841D18D68667B895 /* PortfolioManageView.swift */; };
+		B90719AE57F846F3508C50E9 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EB715352F82287355C2718 /* HomeView.swift */; };
+		C3A9247825E18205BE99D5FF /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A3719086008BDB5BE4C1E68A /* Supabase */; };
+		DD6BC3FFD25CC6D5D21DA737 /* TournamentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */; };
+		F9BDECFA155E09266521899C /* TeamWarsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565197040FE338BF55C84F67 /* TeamWarsListView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		07CC7FAA0839FF2DBED6E118 /* AppWars.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AppWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2219E08B9F9447104C2DF26A /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+		4BE96A4D83C5AAF4E0A7E93A /* AppWars.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppWars.entitlements; sourceTree = "<group>"; };
+		508C501BE801948404A5489D /* SupabaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClient.swift; sourceTree = "<group>"; };
+		565197040FE338BF55C84F67 /* TeamWarsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamWarsListView.swift; sourceTree = "<group>"; };
+		5ED3083C584BE42BCE233528 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TournamentDetailView.swift; sourceTree = "<group>"; };
+		822C686F841D18D68667B895 /* PortfolioManageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioManageView.swift; sourceTree = "<group>"; };
+		93075731F15B5B68085CBD79 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		9536977EC242808356D96D31 /* AppWarsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWarsApp.swift; sourceTree = "<group>"; };
+		988E67161AAB1C1C8D4FF0DE /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		A3EB715352F82287355C2718 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		B3B4B1CD707BFC8C5532F417 /* NotificationBellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationBellView.swift; sourceTree = "<group>"; };
+		B5DB247DBA055B207ED94510 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		BE8768C75BE74DCAFB06C544 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerEffect.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		25A8DF4607D9CBEE3CD2AF9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3A9247825E18205BE99D5FF /* Supabase in Frameworks */,
+				3A80D48E429D6F68A5B4B4F8 /* Kingfisher in Frameworks */,
+				1E96CA4E6037865700565E2B /* ConfettiSwiftUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		081D3037EC6FB30FC139B3FD /* Sponsors */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Sponsors;
+			sourceTree = "<group>";
+		};
+		181298C0DE49F819B50BB37B /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				B3B4B1CD707BFC8C5532F417 /* NotificationBellView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		3B96D66C2805D17CCF9B16E9 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		403B3A99A52742F060F47827 /* TeamWars */ = {
+			isa = PBXGroup;
+			children = (
+				565197040FE338BF55C84F67 /* TeamWarsListView.swift */,
+			);
+			path = TeamWars;
+			sourceTree = "<group>";
+		};
+		42DBC5AC9E2ECBA65E8C54C0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8DDAFDA29387ABEC5F30EBFC /* Admin */,
+				6E28A1087206FCCE55866236 /* Auth */,
+				52E544F6DBC2A0C7840BAFB6 /* Chat */,
+				9E10E2BBB3C2C378AFA8B7A1 /* Home */,
+				E0C29D65F8184979C5EA7B2D /* Leaderboard */,
+				EF504F593B5BB31F968A3E25 /* Portfolio */,
+				97BD57584FC7F2A950E8FA9F /* Profile */,
+				FA7114C04586C4917D8C8476 /* Promote */,
+				081D3037EC6FB30FC139B3FD /* Sponsors */,
+				403B3A99A52742F060F47827 /* TeamWars */,
+				B69373DBA4ED0B64FC73E390 /* Tournament */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		52E544F6DBC2A0C7840BAFB6 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		6E28A1087206FCCE55866236 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				93075731F15B5B68085CBD79 /* LoginView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		8A3882CF333DC851F617A11E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				BE8768C75BE74DCAFB06C544 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		8B8F40A278B3CD225398540F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				07CC7FAA0839FF2DBED6E118 /* AppWars.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8DDAFDA29387ABEC5F30EBFC /* Admin */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Admin;
+			sourceTree = "<group>";
+		};
+		97BD57584FC7F2A950E8FA9F /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				988E67161AAB1C1C8D4FF0DE /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		9E10E2BBB3C2C378AFA8B7A1 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				A3EB715352F82287355C2718 /* HomeView.swift */,
+				B5DB247DBA055B207ED94510 /* MainTabView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		A7ADABC484DF2C07195AC168 = {
+			isa = PBXGroup;
+			children = (
+				E51C4B3A7935126089AA05EA /* AppWars */,
+				8B8F40A278B3CD225398540F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B69373DBA4ED0B64FC73E390 /* Tournament */ = {
+			isa = PBXGroup;
+			children = (
+				66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */,
+			);
+			path = Tournament;
+			sourceTree = "<group>";
+		};
+		C06B0EB16B4DD719AB04D933 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				5ED3083C584BE42BCE233528 /* AuthService.swift */,
+				508C501BE801948404A5489D /* SupabaseClient.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		E0C29D65F8184979C5EA7B2D /* Leaderboard */ = {
+			isa = PBXGroup;
+			children = (
+				2219E08B9F9447104C2DF26A /* LeaderboardView.swift */,
+			);
+			path = Leaderboard;
+			sourceTree = "<group>";
+		};
+		E51C4B3A7935126089AA05EA /* AppWars */ = {
+			isa = PBXGroup;
+			children = (
+				4BE96A4D83C5AAF4E0A7E93A /* AppWars.entitlements */,
+				9536977EC242808356D96D31 /* AppWarsApp.swift */,
+				181298C0DE49F819B50BB37B /* Components */,
+				3B96D66C2805D17CCF9B16E9 /* Extensions */,
+				8A3882CF333DC851F617A11E /* Models */,
+				C06B0EB16B4DD719AB04D933 /* Services */,
+				42DBC5AC9E2ECBA65E8C54C0 /* Views */,
+			);
+			path = AppWars;
+			sourceTree = "<group>";
+		};
+		EF504F593B5BB31F968A3E25 /* Portfolio */ = {
+			isa = PBXGroup;
+			children = (
+				822C686F841D18D68667B895 /* PortfolioManageView.swift */,
+			);
+			path = Portfolio;
+			sourceTree = "<group>";
+		};
+		FA7114C04586C4917D8C8476 /* Promote */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Promote;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		34D09A6B2CE23B431B144F3A /* AppWars */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6FD2E2D20ECE89B2CB7A6374 /* Build configuration list for PBXNativeTarget "AppWars" */;
+			buildPhases = (
+				B6098DE54BB4AA2CDAF9CD8C /* Sources */,
+				25A8DF4607D9CBEE3CD2AF9A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AppWars;
+			packageProductDependencies = (
+				A3719086008BDB5BE4C1E68A /* Supabase */,
+				FE87FC919BACDB02644C9A2B /* Kingfisher */,
+				A9568D2957B6984D68D2AFED /* ConfettiSwiftUI */,
+			);
+			productName = AppWars;
+			productReference = 07CC7FAA0839FF2DBED6E118 /* AppWars.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		85DB8C6B8D114C50E570AF69 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = BF2877DAFC4B2E984D598830 /* Build configuration list for PBXProject "AppWars" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = A7ADABC484DF2C07195AC168;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5E68FA82324DAE77F075A01B /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
+				618C0BE2C35FA003C20A02B4 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				F50C467BC9A9DAAF69632872 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8B8F40A278B3CD225398540F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				34D09A6B2CE23B431B144F3A /* AppWars */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B6098DE54BB4AA2CDAF9CD8C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03C7C7B4DED184F89D5AF14E /* AppWarsApp.swift in Sources */,
+				1305F29FF5E1B3191B92FA1F /* AuthService.swift in Sources */,
+				B90719AE57F846F3508C50E9 /* HomeView.swift in Sources */,
+				4A7440377221DC1B773A04B5 /* LeaderboardView.swift in Sources */,
+				1215068A89C9CA4D473F2F24 /* LoginView.swift in Sources */,
+				1F30F2AB7553C38684ED035E /* MainTabView.swift in Sources */,
+				3878043704102CBDC8CF3CBC /* Models.swift in Sources */,
+				36F59CD7EC2FA8314AC56E57 /* NotificationBellView.swift in Sources */,
+				B0D8D92249D0D0C702432D6D /* PortfolioManageView.swift in Sources */,
+				19C2EC3DA4131C60FEE3043E /* ProfileView.swift in Sources */,
+				84DEBFE9EC36D143E7710696 /* ShimmerEffect.swift in Sources */,
+				97CAE3D9D8417BC60C89FF93 /* SupabaseClient.swift in Sources */,
+				F9BDECFA155E09266521899C /* TeamWarsListView.swift in Sources */,
+				DD6BC3FFD25CC6D5D21DA737 /* TournamentDetailView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		644DF6A21116CB6312EFB310 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		7CC22EE6E9B1B3E045DFCE3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = AppWars/AppWars.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_KEY_CFBundleDisplayName = AppWars;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crmwizai.AppWars;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EC2A40CAFCB663EA139B5083 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		FD09A235BCE69B2AEBDAA5EA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = AppWars/AppWars.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_KEY_CFBundleDisplayName = AppWars;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crmwizai.AppWars;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6FD2E2D20ECE89B2CB7A6374 /* Build configuration list for PBXNativeTarget "AppWars" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7CC22EE6E9B1B3E045DFCE3E /* Debug */,
+				FD09A235BCE69B2AEBDAA5EA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BF2877DAFC4B2E984D598830 /* Build configuration list for PBXProject "AppWars" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC2A40CAFCB663EA139B5083 /* Debug */,
+				644DF6A21116CB6312EFB310 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5E68FA82324DAE77F075A01B /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+		618C0BE2C35FA003C20A02B4 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+		F50C467BC9A9DAAF69632872 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A3719086008BDB5BE4C1E68A /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F50C467BC9A9DAAF69632872 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		A9568D2957B6984D68D2AFED /* ConfettiSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5E68FA82324DAE77F075A01B /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
+			productName = ConfettiSwiftUI;
+		};
+		FE87FC919BACDB02644C9A2B /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 618C0BE2C35FA003C20A02B4 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 85DB8C6B8D114C50E570AF69 /* Project object */;
+}
