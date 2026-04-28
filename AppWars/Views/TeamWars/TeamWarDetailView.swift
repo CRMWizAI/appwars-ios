@@ -221,12 +221,6 @@ struct TeamScoreboardView: View {
     let participants: [TeamWarParticipantData]
     let winningKey: String?
 
-    struct TeamInfo: Codable {
-        let key: String
-        let name: String
-        var color: String?
-    }
-
     var body: some View {
         if let teams = teams {
             HStack(spacing: 12) {
@@ -316,7 +310,7 @@ struct TeamWarMatchRow: View {
                 }
                 Text(isCompleted ? "Final" : "Live")
                     .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(isCompleted ? .secondary : .green)
+                    .foregroundColor(isCompleted ? .gray : .green)
             }
 
             // Side B

@@ -175,12 +175,19 @@ struct AppNotification: Codable, Identifiable {
     }
 }
 
+struct TeamInfo: Codable {
+    let key: String
+    let name: String
+    var color: String?
+}
+
 struct TeamWar: Codable, Identifiable {
     let id: UUID
     var name: String
     var imageUrl: String?
     var description: String?
     var status: String
+    var teams: [TeamInfo]?
     var currentRound: Int
     var currentCategory: String?
     var roundEndDate: Date?
@@ -188,7 +195,7 @@ struct TeamWar: Codable, Identifiable {
     let createdAt: Date?
 
     enum CodingKeys: String, CodingKey {
-        case id, name, description, status
+        case id, name, description, status, teams
         case imageUrl = "image_url"
         case currentRound = "current_round"
         case currentCategory = "current_category"
