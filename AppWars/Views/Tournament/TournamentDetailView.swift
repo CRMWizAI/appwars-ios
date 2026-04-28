@@ -98,7 +98,21 @@ struct TournamentDetailView: View {
             // Content — lazy switch instead of TabView to avoid rendering all tabs at once
             Group {
                 switch selectedTab {
-                case 0: BracketView(matchups: matchups, tournament: tournament)
+                case 0:
+                    if loading {
+                        ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if matchups.isEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: "trophy")
+                                .font(.system(size: 44))
+                                .foregroundStyle(.gray.opacity(0.3))
+                            Text("No matchups yet")
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        BracketView(matchups: matchups, tournament: tournament)
+                    }
                 case 1: VoteNowTab(tournament: tournament, matchups: matchups)
                 case 2: ChatTab(tournamentId: tournament.id)
                 case 3: SponsorsTab(tournamentId: tournament.id)

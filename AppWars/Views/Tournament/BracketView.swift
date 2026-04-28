@@ -85,11 +85,11 @@ struct BracketView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            GeometryReader { geo in
-                let scale = min(1, geo.size.width / totalW)
+            let screenWidth = UIScreen.main.bounds.width
+            let scale = min(1, screenWidth / totalW)
 
-                ScrollView(.vertical, showsIndicators: false) {
-                    ZStack(alignment: .topLeading) {
+            ScrollView([.vertical, .horizontal], showsIndicators: false) {
+                ZStack(alignment: .topLeading) {
                         // Canvas: golden bracket lines
                         Canvas { ctx, size in
                             drawBracket(ctx: ctx)
@@ -123,10 +123,9 @@ struct BracketView: View {
                             .position(x: cx, y: cy)
                         }
                     }
-                    .frame(width: totalW, height: totalH)
-                    .scaleEffect(scale, anchor: .top)
-                    .frame(width: geo.size.width, height: totalH * scale)
-                }
+                .frame(width: totalW, height: totalH)
+                .scaleEffect(scale, anchor: .topLeading)
+                .frame(width: totalW * scale, height: totalH * scale)
             }
         }
     }
