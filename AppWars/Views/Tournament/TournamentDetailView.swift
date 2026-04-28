@@ -18,40 +18,59 @@ struct TournamentDetailView: View {
         return (winnerName, avatarUrl)
     }
 
+    let tabs = [
+        (title: "Bracket", icon: "trophy.fill"),
+        (title: "Vote Now", icon: "hand.thumbsup.fill"),
+        (title: "Chat", icon: "bubble.left.fill"),
+        (title: "Sponsors", icon: "building.2.fill"),
+        (title: "Prizes", icon: "gift.fill"),
+        (title: "Info", icon: "info.circle.fill"),
+    ]
+
     var body: some View {
         VStack(spacing: 0) {
-            // Hero banner
+            // ── HERO BANNER ──
             ZStack(alignment: .bottomLeading) {
                 if let url = tournament.imageUrl, let imageURL = URL(string: url) {
                     KFImage(imageURL)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(height: 180)
+                        .frame(height: 200)
                         .clipped()
                         .overlay(
                             LinearGradient(
-                                colors: [.clear, .black.opacity(0.8)],
+                                stops: [
+                                    .init(color: .clear, location: 0),
+                                    .init(color: .black.opacity(0.4), location: 0.4),
+                                    .init(color: .black.opacity(0.9), location: 1),
+                                ],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
                         )
                 } else {
-                    LinearGradient(
-                        colors: [Color.yellow.opacity(0.3), Color.orange.opacity(0.2), .black],
-                        startPoint: .topTrailing,
-                        endPoint: .bottomLeading
-                    )
-                    .frame(height: 180)
+                    ZStack {
+                        LinearGradient(
+                            colors: [Color.yellow.opacity(0.3), Color.orange.opacity(0.2), .black],
+                            startPoint: .topTrailing,
+                            endPoint: .bottomLeading
+                        )
+                        Image(systemName: "trophy.fill")
+                            .font(.system(size: 60))
+                            .foregroundStyle(.yellow.opacity(0.15))
+                    }
+                    .frame(height: 200)
                 }
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     StatusBadge(status: tournament.status)
 
                     Text(tournament.name)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: 26, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.5), radius: 4)
 
-                    HStack(spacing: 16) {
+                    HStack(spacing: 14) {
                         Label("Round \(tournament.currentRound)/\(tournament.totalRounds ?? 3)", systemImage: "flag.fill")
                         if let count = tournament.playerCount {
                             Label("\(count) builders", systemImage: "person.2.fill")
@@ -63,44 +82,80 @@ struct TournamentDetailView: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.white.opacity(0.7))
                 }
-                .padding(16)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 14)
             }
 
-            // Round countdown
-            if let endDate = tournament.roundEndDateParsed {
-                HStack {
+            // ── COUNTDOWN + CATEGORY BAR ──
+            HStack {
+                if let endDate = tournament.roundEndDateParsed {
                     RoundCountdown(endDate: endDate)
-                    Spacer()
-                    if let cat = tournament.currentCategory {
+                }
+                Spacer()
+                if let cat = tournament.currentCategory {
+                    HStack(spacing: 4) {
+                        Image(systemName: "tag.fill")
+                            .font(.system(size: 9))
                         Text(cat)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(.secondary)
+                    }
+                    .foregroundStyle(.yellow.opacity(0.8))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color.yellow.opacity(0.1))
+                    .clipShape(Capsule())
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+
+            // ── TAB PILLS ──
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) { selectedTab = index }
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: tab.icon)
+                                    .font(.system(size: 11))
+                                Text(tab.title)
+                                    .font(.system(size: 13, weight: .semibold))
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(
+                                selectedTab == index
+                                    ? Color.yellow
+                                    : Color(.secondarySystemBackground)
+                            )
+                            .foregroundStyle(
+                                selectedTab == index ? .black : .secondary
+                            )
+                            .clipShape(Capsule())
+                        }
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 4)
             }
 
-            // Tab picker
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    TabButton(title: "Bracket", isSelected: selectedTab == 0) { selectedTab = 0 }
-                    TabButton(title: "Vote Now", isSelected: selectedTab == 1) { selectedTab = 1 }
-                    TabButton(title: "Chat", isSelected: selectedTab == 2) { selectedTab = 2 }
-                    TabButton(title: "Sponsors", isSelected: selectedTab == 3) { selectedTab = 3 }
-                    TabButton(title: "Prizes", isSelected: selectedTab == 4) { selectedTab = 4 }
-                    TabButton(title: "Info", isSelected: selectedTab == 5) { selectedTab = 5 }
-                }
-                .padding(.horizontal, 16)
-            }
-            .padding(.top, 4)
+            // Subtle separator
+            Rectangle()
+                .fill(Color.white.opacity(0.04))
+                .frame(height: 1)
+                .padding(.top, 6)
 
-            // Content — lazy switch instead of TabView to avoid rendering all tabs at once
+            // ── TAB CONTENT ──
             Group {
                 switch selectedTab {
                 case 0:
                     if loading {
-                        ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                        VStack {
+                            Spacer()
+                            ProgressView()
+                                .tint(.yellow)
+                            Spacer()
+                        }
                     } else if matchups.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "trophy")
@@ -123,6 +178,7 @@ struct TournamentDetailView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .background(Color(.systemBackground))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .task { await loadMatchups() }
@@ -168,70 +224,66 @@ struct TournamentDetailView: View {
     }
 }
 
-// MARK: - Custom Tab Button
-struct TabButton: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                Text(title)
-                    .font(.system(size: 14, weight: isSelected ? .bold : .medium))
-                    .foregroundStyle(isSelected ? .yellow : .secondary)
-                Rectangle()
-                    .fill(isSelected ? Color.yellow : Color.clear)
-                    .frame(height: 2)
-                    .clipShape(Capsule())
-            }
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
-
 // MARK: - Chat Tab
 struct ChatTab: View {
     let tournamentId: UUID
     @State private var messages: [ChatMessage] = []
     @State private var newMessage = ""
+    @State private var loading = true
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                LazyVStack(spacing: 6) {
-                    ForEach(messages) { msg in
-                        HStack(alignment: .top, spacing: 8) {
-                            Circle()
-                                .fill(Color.yellow.opacity(0.15))
-                                .frame(width: 30, height: 30)
-                                .overlay(
-                                    Text(String(msg.authorName?.prefix(1) ?? "?").uppercased())
-                                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                                        .foregroundStyle(.yellow)
-                                )
-
-                            VStack(alignment: .leading, spacing: 3) {
-                                HStack(spacing: 6) {
-                                    Text(msg.authorName ?? "User")
-                                        .font(.system(size: 12, weight: .semibold))
-                                    if let dateStr = msg.createdAt {
-                                        Text(timeAgo(dateStr))
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(.tertiary)
-                                    }
-                                }
-                                Text(msg.content)
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(.primary.opacity(0.9))
-                            }
-                            Spacer()
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 4)
-                    }
+            if loading {
+                VStack { Spacer(); ProgressView().tint(.yellow); Spacer() }
+            } else if messages.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "bubble.left.and.bubble.right")
+                        .font(.system(size: 40))
+                        .foregroundStyle(.gray.opacity(0.3))
+                    Text("No messages yet")
+                        .foregroundStyle(.secondary)
+                    Text("Be the first to say something!")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
-                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 4) {
+                        ForEach(messages) { msg in
+                            HStack(alignment: .top, spacing: 10) {
+                                Circle()
+                                    .fill(chatColor(msg.authorName ?? "?").opacity(0.2))
+                                    .frame(width: 32, height: 32)
+                                    .overlay(
+                                        Text(String(msg.authorName?.prefix(1) ?? "?").uppercased())
+                                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                                            .foregroundStyle(chatColor(msg.authorName ?? "?"))
+                                    )
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    HStack(spacing: 6) {
+                                        Text(msg.authorName ?? "User")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundStyle(chatColor(msg.authorName ?? "?"))
+                                        if let dateStr = msg.createdAt {
+                                            Text(timeAgo(dateStr))
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(.tertiary)
+                                        }
+                                    }
+                                    Text(msg.content)
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(.primary.opacity(0.9))
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 6)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
             }
 
             // Input bar
@@ -247,14 +299,14 @@ struct ChatTab: View {
                     // TODO: send message
                 } label: {
                     Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 28))
+                        .font(.system(size: 30))
                         .foregroundStyle(.yellow)
                 }
                 .disabled(newMessage.isEmpty)
-                .opacity(newMessage.isEmpty ? 0.4 : 1)
+                .opacity(newMessage.isEmpty ? 0.3 : 1)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
             .background(.ultraThinMaterial)
         }
         .task { await loadMessages() }
@@ -272,6 +324,12 @@ struct ChatTab: View {
         } catch {
             print("Failed to load chat: \(error)")
         }
+        loading = false
+    }
+
+    func chatColor(_ name: String) -> Color {
+        let colors: [Color] = [.yellow, .orange, .cyan, .green, .pink, .purple, .blue, .mint, .indigo, .red]
+        return colors[abs(name.hashValue) % colors.count]
     }
 }
 
@@ -289,14 +347,12 @@ struct InfoTab: View {
                         .lineSpacing(4)
                 }
 
-                // Stats row
-                HStack(spacing: 0) {
+                HStack(spacing: 8) {
                     StatPill(value: "\(tournament.currentRound)", label: "Round", icon: "flag.fill")
                     StatPill(value: "\(tournament.playerCount ?? 0)", label: "Players", icon: "person.2.fill")
                     StatPill(value: "\(tournament.roundDurationHours ?? 48)h", label: "Per Round", icon: "clock.fill")
                 }
 
-                // Prizes
                 if let prizes = tournament.prizes, !prizes.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("PRIZES")
@@ -309,23 +365,30 @@ struct InfoTab: View {
                                 ZStack {
                                     Circle()
                                         .fill(prize.place == 1 ? Color.yellow.opacity(0.2) : Color.gray.opacity(0.15))
-                                        .frame(width: 40, height: 40)
-                                    Image(systemName: "trophy.fill")
-                                        .font(.system(size: 16))
+                                        .frame(width: 44, height: 44)
+                                    Image(systemName: prize.place == 1 ? "trophy.fill" : "medal.fill")
+                                        .font(.system(size: 18))
                                         .foregroundStyle(prize.place == 1 ? .yellow : .gray)
                                 }
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("#\(prize.place) Place")
-                                        .font(.system(size: 12, weight: .semibold))
+                                    Text(prize.place == 1 ? "1st Place" : "\(prize.place)th Place")
+                                        .font(.system(size: 11, weight: .semibold))
                                         .foregroundStyle(.secondary)
                                     Text(prize.name)
                                         .font(.system(size: 15, weight: .semibold))
                                 }
                                 Spacer()
+                                if let url = prize.imageUrl, let imageURL = URL(string: url) {
+                                    KFImage(imageURL)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 44, height: 44)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                }
                             }
-                            .padding(12)
+                            .padding(14)
                             .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
                     }
                 }
@@ -343,17 +406,17 @@ struct StatPill: View {
     var body: some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.system(size: 12))
+                .font(.system(size: 13))
                 .foregroundStyle(.yellow)
             Text(value)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.system(size: 20, weight: .bold, design: .rounded))
             Text(label)
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
         .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
