@@ -11,6 +11,7 @@
 		1215068A89C9CA4D473F2F24 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93075731F15B5B68085CBD79 /* LoginView.swift */; };
 		1305F29FF5E1B3191B92FA1F /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ED3083C584BE42BCE233528 /* AuthService.swift */; };
 		19C2EC3DA4131C60FEE3043E /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988E67161AAB1C1C8D4FF0DE /* ProfileView.swift */; };
+		1D66EDDEC4FAF408A86733C5 /* BracketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45F3A0DF3B0A1D56BCE38E5 /* BracketView.swift */; };
 		1E96CA4E6037865700565E2B /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = A9568D2957B6984D68D2AFED /* ConfettiSwiftUI */; };
 		1F30F2AB7553C38684ED035E /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DB247DBA055B207ED94510 /* MainTabView.swift */; };
 		36F59CD7EC2FA8314AC56E57 /* NotificationBellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B4B1CD707BFC8C5532F417 /* NotificationBellView.swift */; };
@@ -42,6 +43,7 @@
 		B3B4B1CD707BFC8C5532F417 /* NotificationBellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationBellView.swift; sourceTree = "<group>"; };
 		B5DB247DBA055B207ED94510 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		BE8768C75BE74DCAFB06C544 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		C45F3A0DF3B0A1D56BCE38E5 /* BracketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BracketView.swift; sourceTree = "<group>"; };
 		DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerEffect.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -174,6 +176,7 @@
 		B69373DBA4ED0B64FC73E390 /* Tournament */ = {
 			isa = PBXGroup;
 			children = (
+				C45F3A0DF3B0A1D56BCE38E5 /* BracketView.swift */,
 				66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */,
 			);
 			path = Tournament;
@@ -291,6 +294,7 @@
 			files = (
 				03C7C7B4DED184F89D5AF14E /* AppWarsApp.swift in Sources */,
 				1305F29FF5E1B3191B92FA1F /* AuthService.swift in Sources */,
+				1D66EDDEC4FAF408A86733C5 /* BracketView.swift in Sources */,
 				B90719AE57F846F3508C50E9 /* HomeView.swift in Sources */,
 				4A7440377221DC1B773A04B5 /* LeaderboardView.swift in Sources */,
 				1215068A89C9CA4D473F2F24 /* LoginView.swift in Sources */,
@@ -372,6 +376,7 @@
 				CODE_SIGN_ENTITLEMENTS = AppWars/AppWars.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = AppWars;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -382,7 +387,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.crmwizai.AppWars;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crmwizai.appwars2.AppWars;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -459,6 +464,7 @@
 				CODE_SIGN_ENTITLEMENTS = AppWars/AppWars.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = AppWars;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -469,7 +475,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.crmwizai.AppWars;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crmwizai.appwars2.AppWars;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				TARGETED_DEVICE_FAMILY = "1,2";

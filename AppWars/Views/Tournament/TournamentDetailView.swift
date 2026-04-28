@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct TournamentDetailView: View {
     let tournament: Tournament
@@ -8,17 +9,64 @@ struct TournamentDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Tab picker
-            Picker("", selection: $selectedTab) {
-                Text("Bracket").tag(0)
-                Text("Chat").tag(1)
-                Text("Info").tag(2)
-            }
-            .pickerStyle(.segmented)
-            .padding()
+            // Hero banner
+            ZStack(alignment: .bottomLeading) {
+                if let url = tournament.imageUrl, let imageURL = URL(string: url) {
+                    KFImage(imageURL)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 180)
+                        .clipped()
+                        .overlay(
+                            LinearGradient(
+                                colors: [.clear, .black.opacity(0.8)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                } else {
+                    LinearGradient(
+                        colors: [Color.yellow.opacity(0.3), Color.orange.opacity(0.2), .black],
+                        startPoint: .topTrailing,
+                        endPoint: .bottomLeading
+                    )
+                    .frame(height: 180)
+                }
 
+                VStack(alignment: .leading, spacing: 6) {
+                    StatusBadge(status: tournament.status)
+
+                    Text(tournament.name)
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+
+                    HStack(spacing: 16) {
+                        Label("Round \(tournament.currentRound)/\(tournament.totalRounds ?? 3)", systemImage: "flag.fill")
+                        if let count = tournament.playerCount {
+                            Label("\(count) builders", systemImage: "person.2.fill")
+                        }
+                        if let hours = tournament.roundDurationHours {
+                            Label("\(hours)h rounds", systemImage: "clock.fill")
+                        }
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.7))
+                }
+                .padding(16)
+            }
+
+            // Tab picker
+            HStack(spacing: 0) {
+                TabButton(title: "Bracket", isSelected: selectedTab == 0) { selectedTab = 0 }
+                TabButton(title: "Chat", isSelected: selectedTab == 1) { selectedTab = 1 }
+                TabButton(title: "Info", isSelected: selectedTab == 2) { selectedTab = 2 }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+
+            // Content
             TabView(selection: $selectedTab) {
-                BracketTab(tournament: tournament, matchups: matchups, loading: loading)
+                BracketView(matchups: matchups, tournament: tournament)
                     .tag(0)
                 ChatTab(tournamentId: tournament.id)
                     .tag(1)
@@ -27,8 +75,8 @@ struct TournamentDetailView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
-        .navigationTitle(tournament.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .task { await loadMatchups() }
     }
 
@@ -49,36 +97,25 @@ struct TournamentDetailView: View {
     }
 }
 
-// MARK: - Bracket Tab
-struct BracketTab: View {
-    let tournament: Tournament
-    let matchups: [Matchup]
-    let loading: Bool
+// MARK: - Custom Tab Button
+struct TabButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
 
     var body: some View {
-        ScrollView {
-            if loading {
-                ProgressView()
-                    .padding(.top, 40)
-            } else {
-                let rounds = Dictionary(grouping: matchups, by: \.round)
-                    .sorted { $0.key < $1.key }
-
-                ForEach(rounds, id: \.key) { round, roundMatchups in
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Round \(round)")
-                            .font(.headline)
-                            .padding(.horizontal)
-
-                        ForEach(roundMatchups) { matchup in
-                            MatchupCardView(matchup: matchup)
-                                .padding(.horizontal)
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 14, weight: isSelected ? .bold : .medium))
+                    .foregroundStyle(isSelected ? .yellow : .secondary)
+                Rectangle()
+                    .fill(isSelected ? Color.yellow : Color.clear)
+                    .frame(height: 2)
+                    .clipShape(Capsule())
             }
         }
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -91,53 +128,63 @@ struct ChatTab: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                LazyVStack(spacing: 8) {
+                LazyVStack(spacing: 6) {
                     ForEach(messages) { msg in
                         HStack(alignment: .top, spacing: 8) {
                             Circle()
-                                .fill(Color.yellow.opacity(0.2))
-                                .frame(width: 28, height: 28)
+                                .fill(Color.yellow.opacity(0.15))
+                                .frame(width: 30, height: 30)
                                 .overlay(
                                     Text(String(msg.authorName?.prefix(1) ?? "?").uppercased())
-                                        .font(.caption2.weight(.bold))
+                                        .font(.system(size: 11, weight: .bold, design: .rounded))
                                         .foregroundStyle(.yellow)
                                 )
-                            VStack(alignment: .leading, spacing: 2) {
-                                HStack {
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                HStack(spacing: 6) {
                                     Text(msg.authorName ?? "User")
-                                        .font(.caption.weight(.semibold))
-                                    Spacer()
+                                        .font(.system(size: 12, weight: .semibold))
                                     if let date = msg.createdAt {
                                         Text(date, style: .relative)
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
+                                            .font(.system(size: 10))
+                                            .foregroundStyle(.tertiary)
                                     }
                                 }
                                 Text(msg.content)
-                                    .font(.subheadline)
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.primary.opacity(0.9))
                             }
+                            Spacer()
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 4)
                     }
                 }
-                .padding(.vertical)
+                .padding(.vertical, 8)
             }
 
-            // Input
-            HStack(spacing: 8) {
+            // Input bar
+            HStack(spacing: 10) {
                 TextField("Message...", text: $newMessage)
-                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 14))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color(.tertiarySystemBackground))
+                    .clipShape(Capsule())
+
                 Button {
                     // TODO: send message
                 } label: {
                     Image(systemName: "arrow.up.circle.fill")
-                        .font(.title2)
+                        .font(.system(size: 28))
                         .foregroundStyle(.yellow)
                 }
                 .disabled(newMessage.isEmpty)
+                .opacity(newMessage.isEmpty ? 0.4 : 1)
             }
-            .padding()
-            .background(Color(.secondarySystemBackground))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(.ultraThinMaterial)
         }
         .task { await loadMessages() }
     }
@@ -163,96 +210,79 @@ struct InfoTab: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 20) {
                 if let desc = tournament.description {
                     Text(desc)
-                        .font(.body)
+                        .font(.system(size: 15))
+                        .foregroundStyle(.primary.opacity(0.8))
+                        .lineSpacing(4)
                 }
 
-                HStack {
-                    InfoChip(label: "Status", value: tournament.status.capitalized)
-                    InfoChip(label: "Round", value: "\(tournament.currentRound)")
-                    if let count = tournament.playerCount {
-                        InfoChip(label: "Players", value: "\(count)")
-                    }
+                // Stats row
+                HStack(spacing: 0) {
+                    StatPill(value: "\(tournament.currentRound)", label: "Round", icon: "flag.fill")
+                    StatPill(value: "\(tournament.playerCount ?? 0)", label: "Players", icon: "person.2.fill")
+                    StatPill(value: "\(tournament.roundDurationHours ?? 48)h", label: "Per Round", icon: "clock.fill")
                 }
 
+                // Prizes
                 if let prizes = tournament.prizes, !prizes.isEmpty {
-                    Text("Prizes")
-                        .font(.headline)
-                    ForEach(prizes, id: \.place) { prize in
-                        HStack {
-                            Image(systemName: "trophy.fill")
-                                .foregroundStyle(prize.place == 1 ? .yellow : .gray)
-                            Text("#\(prize.place) — \(prize.name)")
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("PRIZES")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.5)
+                            .foregroundStyle(.secondary)
+
+                        ForEach(prizes, id: \.place) { prize in
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    Circle()
+                                        .fill(prize.place == 1 ? Color.yellow.opacity(0.2) : Color.gray.opacity(0.15))
+                                        .frame(width: 40, height: 40)
+                                    Image(systemName: "trophy.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundStyle(prize.place == 1 ? .yellow : .gray)
+                                }
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("#\(prize.place) Place")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundStyle(.secondary)
+                                    Text(prize.name)
+                                        .font(.system(size: 15, weight: .semibold))
+                                }
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                     }
                 }
             }
-            .padding()
+            .padding(16)
         }
     }
 }
 
-struct InfoChip: View {
-    let label: String
+struct StatPill: View {
     let value: String
-    var body: some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(.headline)
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-}
-
-struct MatchupCardView: View {
-    let matchup: Matchup
-
-    var body: some View {
-        VStack(spacing: 8) {
-            HStack {
-                PlayerSide(name: matchup.participantAUsername ?? "TBD", votes: matchup.votesA, isWinner: matchup.winnerId == matchup.participantAId)
-                Text("vs")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary)
-                PlayerSide(name: matchup.participantBUsername ?? "TBD", votes: matchup.votesB, isWinner: matchup.winnerId == matchup.participantBId)
-            }
-
-            if let category = matchup.category {
-                Text(category)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-        }
-        .padding(12)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-}
-
-struct PlayerSide: View {
-    let name: String
-    let votes: Int
-    let isWinner: Bool
+    let label: String
+    let icon: String
 
     var body: some View {
         VStack(spacing: 4) {
-            Text(name)
-                .font(.subheadline.weight(isWinner ? .bold : .regular))
-                .lineLimit(1)
-                .foregroundStyle(isWinner ? .yellow : .primary)
-            Text("\(votes) votes")
-                .font(.caption2)
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundStyle(.yellow)
+            Text(value)
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
