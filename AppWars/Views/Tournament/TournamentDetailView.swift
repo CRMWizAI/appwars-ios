@@ -95,22 +95,19 @@ struct TournamentDetailView: View {
             }
             .padding(.top, 4)
 
-            // Content
-            TabView(selection: $selectedTab) {
-                BracketView(matchups: matchups, tournament: tournament)
-                    .tag(0)
-                VoteNowTab(tournament: tournament, matchups: matchups)
-                    .tag(1)
-                ChatTab(tournamentId: tournament.id)
-                    .tag(2)
-                SponsorsTab(tournamentId: tournament.id)
-                    .tag(3)
-                PrizesTab(tournament: tournament)
-                    .tag(4)
-                InfoTab(tournament: tournament)
-                    .tag(5)
+            // Content — lazy switch instead of TabView to avoid rendering all tabs at once
+            Group {
+                switch selectedTab {
+                case 0: BracketView(matchups: matchups, tournament: tournament)
+                case 1: VoteNowTab(tournament: tournament, matchups: matchups)
+                case 2: ChatTab(tournamentId: tournament.id)
+                case 3: SponsorsTab(tournamentId: tournament.id)
+                case 4: PrizesTab(tournament: tournament)
+                case 5: InfoTab(tournament: tournament)
+                default: EmptyView()
+                }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -139,6 +136,7 @@ struct TournamentDetailView: View {
     }
 
     func loadMatchups() async {
+        print("Loading matchups for tournament: \(tournament.id.uuidString)")
         do {
             let response: [Matchup] = try await supabase.from("matchups")
                 .select()
@@ -147,6 +145,7 @@ struct TournamentDetailView: View {
                 .order("bracket_position")
                 .execute()
                 .value
+            print("Loaded \(response.count) matchups")
             matchups = response
         } catch {
             print("Failed to load matchups: \(error)")
