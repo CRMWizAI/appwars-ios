@@ -276,7 +276,9 @@ struct ProfileView: View {
                 .eq("id", value: auth.profile?.id.uuidString ?? "")
                 .execute()
 
-            await auth.fetchProfile(userId: auth.user!.id)
+            if let profileId = auth.profile?.id {
+                await auth.fetchProfile(userId: profileId)
+            }
             modified = false
         } catch {
             print("Save failed: \(error)")
