@@ -110,33 +110,44 @@ struct TournamentDetailView: View {
             .padding(.vertical, 8)
 
             // ── TAB PILLS ──
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) { selectedTab = index }
-                        } label: {
-                            HStack(spacing: 5) {
-                                Image(systemName: tab.icon)
-                                    .font(.system(size: 11))
-                                Text(tab.title)
-                                    .font(.system(size: 13, weight: .semibold))
+            ScrollViewReader { scrollProxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    selectedTab = index
+                                }
+                                withAnimation {
+                                    scrollProxy.scrollTo(index, anchor: .center)
+                                }
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: tab.icon)
+                                        .font(.system(size: 11))
+                                    Text(tab.title)
+                                        .font(.system(size: 13, weight: .semibold))
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background(
+                                    selectedTab == index
+                                        ? Color.yellow
+                                        : Color(.secondarySystemBackground)
+                                )
+                                .foregroundStyle(
+                                    selectedTab == index ? .black : .secondary
+                                )
+                                .clipShape(Capsule())
                             }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(
-                                selectedTab == index
-                                    ? Color.yellow
-                                    : Color(.secondarySystemBackground)
-                            )
-                            .foregroundStyle(
-                                selectedTab == index ? .black : .secondary
-                            )
-                            .clipShape(Capsule())
+                            .id(index)
                         }
                     }
+                    .padding(.horizontal, 16)
                 }
-                .padding(.horizontal, 16)
+                .onChange(of: selectedTab) { _, newValue in
+                    withAnimation { scrollProxy.scrollTo(newValue, anchor: .center) }
+                }
             }
 
             // Subtle separator
@@ -145,15 +156,13 @@ struct TournamentDetailView: View {
                 .frame(height: 1)
                 .padding(.top, 6)
 
-            // ── TAB CONTENT ──
-            Group {
-                switch selectedTab {
-                case 0:
+            // ── TAB CONTENT (swipeable) ──
+            TabView(selection: $selectedTab) {
+                Group {
                     if loading {
                         VStack {
                             Spacer()
-                            ProgressView()
-                                .tint(.yellow)
+                            ProgressView().tint(.yellow)
                             Spacer()
                         }
                     } else if matchups.isEmpty {
@@ -164,19 +173,24 @@ struct TournamentDetailView: View {
                             Text("No matchups yet")
                                 .foregroundStyle(.secondary)
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         SimpleBracketList(matchups: matchups, tournament: tournament)
                     }
-                case 1: VoteNowTab(tournament: tournament, matchups: matchups)
-                case 2: ChatTab(tournamentId: tournament.id)
-                case 3: SponsorsTab(tournamentId: tournament.id)
-                case 4: PrizesTab(tournament: tournament)
-                case 5: InfoTab(tournament: tournament)
-                default: EmptyView()
                 }
+                .tag(0)
+
+                VoteNowTab(tournament: tournament, matchups: matchups)
+                    .tag(1)
+                ChatTab(tournamentId: tournament.id)
+                    .tag(2)
+                SponsorsTab(tournamentId: tournament.id)
+                    .tag(3)
+                PrizesTab(tournament: tournament)
+                    .tag(4)
+                InfoTab(tournament: tournament)
+                    .tag(5)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .background(Color(.systemBackground))
         .navigationBarTitleDisplayMode(.inline)
