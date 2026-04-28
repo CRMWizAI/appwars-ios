@@ -5,6 +5,7 @@ struct TournamentDetailView: View {
     let tournament: Tournament
     @State private var selectedTab = 0
     @State private var matchups: [Matchup] = []
+    @State private var sponsors: [SponsorData] = []
     @State private var loading = true
     @State private var showChampion = false
 
@@ -19,183 +20,146 @@ struct TournamentDetailView: View {
     }
 
     let tabs = [
+        (title: "Home", icon: "house.fill"),
         (title: "Bracket", icon: "trophy.fill"),
-        (title: "Vote Now", icon: "hand.thumbsup.fill"),
+        (title: "Vote", icon: "hand.thumbsup.fill"),
         (title: "Chat", icon: "bubble.left.fill"),
         (title: "Sponsors", icon: "building.2.fill"),
         (title: "Prizes", icon: "gift.fill"),
-        (title: "Info", icon: "info.circle.fill"),
     ]
 
     var body: some View {
-        VStack(spacing: 0) {
-            // ── HERO BANNER ──
-            ZStack(alignment: .bottomLeading) {
-                if let url = tournament.imageUrl, let imageURL = URL(string: url) {
-                    KFImage(imageURL)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(height: 200)
-                        .clipped()
-                        .overlay(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .clear, location: 0),
-                                    .init(color: .black.opacity(0.4), location: 0.4),
-                                    .init(color: .black.opacity(0.9), location: 1),
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                // ── HERO BANNER (compact) ──
+                ZStack(alignment: .bottomLeading) {
+                    if let url = tournament.imageUrl, let imageURL = URL(string: url) {
+                        KFImage(imageURL)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 140)
+                            .clipped()
+                            .overlay(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .clear, location: 0),
+                                        .init(color: .black.opacity(0.5), location: 0.5),
+                                        .init(color: .black.opacity(0.95), location: 1),
+                                    ],
+                                    startPoint: .top, endPoint: .bottom
+                                )
                             )
-                        )
-                } else {
-                    ZStack {
-                        LinearGradient(
-                            colors: [Color.yellow.opacity(0.3), Color.orange.opacity(0.2), .black],
-                            startPoint: .topTrailing,
-                            endPoint: .bottomLeading
-                        )
-                        Image(systemName: "trophy.fill")
-                            .font(.system(size: 60))
-                            .foregroundStyle(.yellow.opacity(0.15))
-                    }
-                    .frame(height: 200)
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    StatusBadge(status: tournament.status)
-
-                    Text(tournament.name)
-                        .font(.system(size: 26, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .shadow(color: .black.opacity(0.5), radius: 4)
-
-                    HStack(spacing: 14) {
-                        Label("Round \(tournament.currentRound)/\(tournament.totalRounds ?? 3)", systemImage: "flag.fill")
-                        if let count = tournament.playerCount {
-                            Label("\(count) builders", systemImage: "person.2.fill")
-                        }
-                        if let hours = tournament.roundDurationHours {
-                            Label("\(hours)h rounds", systemImage: "clock.fill")
-                        }
-                    }
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.7))
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 14)
-            }
-
-            // ── COUNTDOWN + CATEGORY BAR ──
-            HStack {
-                if let endDate = tournament.roundEndDateParsed {
-                    RoundCountdown(endDate: endDate)
-                }
-                Spacer()
-                if let cat = tournament.currentCategory {
-                    HStack(spacing: 4) {
-                        Image(systemName: "tag.fill")
-                            .font(.system(size: 9))
-                        Text(cat)
-                            .font(.system(size: 11, weight: .medium))
-                    }
-                    .foregroundStyle(.yellow.opacity(0.8))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Color.yellow.opacity(0.1))
-                    .clipShape(Capsule())
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-
-            // ── TAB PILLS ──
-            ScrollViewReader { scrollProxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    selectedTab = index
-                                }
-                                withAnimation {
-                                    scrollProxy.scrollTo(index, anchor: .center)
-                                }
-                            } label: {
-                                HStack(spacing: 5) {
-                                    Image(systemName: tab.icon)
-                                        .font(.system(size: 11))
-                                    Text(tab.title)
-                                        .font(.system(size: 13, weight: .semibold))
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 8)
-                                .background(
-                                    selectedTab == index
-                                        ? Color.yellow
-                                        : Color(.secondarySystemBackground)
-                                )
-                                .foregroundStyle(
-                                    selectedTab == index ? .black : .secondary
-                                )
-                                .clipShape(Capsule())
-                            }
-                            .id(index)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                }
-                .onChange(of: selectedTab) { _, newValue in
-                    withAnimation { scrollProxy.scrollTo(newValue, anchor: .center) }
-                }
-            }
-
-            // Subtle separator
-            Rectangle()
-                .fill(Color.white.opacity(0.04))
-                .frame(height: 1)
-                .padding(.top, 6)
-
-            // ── TAB CONTENT (swipeable) ──
-            TabView(selection: $selectedTab) {
-                Group {
-                    if loading {
-                        VStack {
-                            Spacer()
-                            ProgressView().tint(.yellow)
-                            Spacer()
-                        }
-                    } else if matchups.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "trophy")
-                                .font(.system(size: 44))
-                                .foregroundStyle(.gray.opacity(0.3))
-                            Text("No matchups yet")
-                                .foregroundStyle(.secondary)
-                        }
                     } else {
-                        SimpleBracketList(matchups: matchups, tournament: tournament)
+                        LinearGradient(colors: [.yellow.opacity(0.3), .orange.opacity(0.2), .black], startPoint: .topTrailing, endPoint: .bottomLeading)
+                            .frame(height: 140)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        // Presented by
+                        if let topSponsor = sponsors.first {
+                            HStack(spacing: 4) {
+                                Text("PRESENTED BY")
+                                    .font(.system(size: 8, weight: .heavy))
+                                    .tracking(1)
+                                Text(topSponsor.sponsorName)
+                                    .font(.system(size: 10, weight: .bold))
+                            }
+                            .foregroundStyle(.yellow.opacity(0.7))
+                        }
+
+                        HStack(spacing: 8) {
+                            Text(tournament.name)
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                            StatusBadge(status: tournament.status)
+                        }
+
+                        HStack(spacing: 12) {
+                            Label("\(tournament.playerCount ?? 0) builders", systemImage: "person.2.fill")
+                            if let endDate = tournament.roundEndDateParsed {
+                                RoundCountdown(endDate: endDate)
+                            }
+                        }
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.6))
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 10)
+                }
+
+                // ── TAB PILLS ──
+                ScrollViewReader { scrollProxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) { selectedTab = index }
+                                    withAnimation { scrollProxy.scrollTo(index, anchor: .center) }
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: tab.icon)
+                                            .font(.system(size: 10))
+                                        Text(tab.title)
+                                            .font(.system(size: 12, weight: .semibold))
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 7)
+                                    .background(selectedTab == index ? Color.yellow : Color(.secondarySystemBackground))
+                                    .foregroundStyle(selectedTab == index ? .black : .secondary)
+                                    .clipShape(Capsule())
+                                }
+                                .id(index)
+                            }
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 6)
+                    }
+                    .onChange(of: selectedTab) { _, newValue in
+                        withAnimation { scrollProxy.scrollTo(newValue, anchor: .center) }
                     }
                 }
-                .tag(0)
 
-                VoteNowTab(tournament: tournament, matchups: matchups)
+                // ── TAB CONTENT (swipeable) ──
+                TabView(selection: $selectedTab) {
+                    TournamentHomeTab(tournament: tournament, matchups: matchups, sponsors: sponsors)
+                        .tag(0)
+
+                    Group {
+                        if loading {
+                            VStack { Spacer(); ProgressView().tint(.yellow); Spacer() }
+                        } else {
+                            SimpleBracketList(matchups: matchups, tournament: tournament)
+                        }
+                    }
                     .tag(1)
-                ChatTab(tournamentId: tournament.id)
-                    .tag(2)
-                SponsorsTab(tournamentId: tournament.id)
-                    .tag(3)
-                PrizesTab(tournament: tournament)
-                    .tag(4)
-                InfoTab(tournament: tournament)
-                    .tag(5)
+
+                    VoteNowTab(tournament: tournament, matchups: matchups)
+                        .tag(2)
+                    ChatTab(tournamentId: tournament.id)
+                        .tag(3)
+                    SponsorsTab(tournamentId: tournament.id)
+                        .tag(4)
+                    PrizesTab(tournament: tournament)
+                        .tag(5)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            // Pad bottom for marquee
+            .padding(.bottom, sponsors.isEmpty ? 0 : 48)
+
+            // ── SPONSOR MARQUEE (sticky bottom) ──
+            if selectedTab != 3 { // hide on chat
+                SponsorMarquee(sponsors: sponsors)
+            }
         }
         .background(Color(.systemBackground))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
-        .task { await loadMatchups() }
+        .task {
+            await loadMatchups()
+            await loadSponsors()
+        }
         .onChange(of: matchups.count) { _, _ in
             if champion != nil && !showChampion {
                 let key = "champion_shown_\(tournament.id)"
@@ -220,7 +184,6 @@ struct TournamentDetailView: View {
     }
 
     func loadMatchups() async {
-        print("Loading matchups for tournament: \(tournament.id.uuidString)")
         do {
             let response: [Matchup] = try await supabase.from("matchups")
                 .select()
@@ -229,12 +192,25 @@ struct TournamentDetailView: View {
                 .order("bracket_position")
                 .execute()
                 .value
-            print("Loaded \(response.count) matchups")
             matchups = response
         } catch {
             print("Failed to load matchups: \(error)")
         }
         loading = false
+    }
+
+    func loadSponsors() async {
+        do {
+            let response: [SponsorData] = try await supabase.from("tournament_sponsors")
+                .select()
+                .eq("tournament_id", value: tournament.id.uuidString)
+                .eq("status", value: "active")
+                .execute()
+                .value
+            sponsors = response
+        } catch {
+            print("Failed to load sponsors: \(error)")
+        }
     }
 }
 
@@ -274,7 +250,6 @@ struct ChatTab: View {
                                             .font(.system(size: 12, weight: .bold, design: .rounded))
                                             .foregroundStyle(chatColor(msg.authorName ?? "?"))
                                     )
-
                                 VStack(alignment: .leading, spacing: 3) {
                                     HStack(spacing: 6) {
                                         Text(msg.authorName ?? "User")
@@ -300,7 +275,6 @@ struct ChatTab: View {
                 }
             }
 
-            // Input bar
             HStack(spacing: 10) {
                 TextField("Message...", text: $newMessage)
                     .font(.system(size: 14))
@@ -347,7 +321,7 @@ struct ChatTab: View {
     }
 }
 
-// MARK: - Info Tab
+// MARK: - Info Tab (kept for backward compat but Home tab replaces it)
 struct InfoTab: View {
     let tournament: Tournament
 
@@ -360,51 +334,10 @@ struct InfoTab: View {
                         .foregroundStyle(.primary.opacity(0.8))
                         .lineSpacing(4)
                 }
-
                 HStack(spacing: 8) {
                     StatPill(value: "\(tournament.currentRound)", label: "Round", icon: "flag.fill")
                     StatPill(value: "\(tournament.playerCount ?? 0)", label: "Players", icon: "person.2.fill")
                     StatPill(value: "\(tournament.roundDurationHours ?? 48)h", label: "Per Round", icon: "clock.fill")
-                }
-
-                if let prizes = tournament.prizes, !prizes.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("PRIZES")
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .tracking(1.5)
-                            .foregroundStyle(.secondary)
-
-                        ForEach(prizes, id: \.place) { prize in
-                            HStack(spacing: 12) {
-                                ZStack {
-                                    Circle()
-                                        .fill(prize.place == 1 ? Color.yellow.opacity(0.2) : Color.gray.opacity(0.15))
-                                        .frame(width: 44, height: 44)
-                                    Image(systemName: prize.place == 1 ? "trophy.fill" : "medal.fill")
-                                        .font(.system(size: 18))
-                                        .foregroundStyle(prize.place == 1 ? .yellow : .gray)
-                                }
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(prize.place == 1 ? "1st Place" : "\(prize.place)th Place")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundStyle(.secondary)
-                                    Text(prize.name)
-                                        .font(.system(size: 15, weight: .semibold))
-                                }
-                                Spacer()
-                                if let url = prize.imageUrl, let imageURL = URL(string: url) {
-                                    KFImage(imageURL)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: 44, height: 44)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                }
-                            }
-                            .padding(14)
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                        }
-                    }
                 }
             }
             .padding(16)
