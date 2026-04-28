@@ -1,8 +1,9 @@
 import SwiftUI
 import Kingfisher
 
-/// Full tournament bracket — horizontal scroll through rounds,
-/// connected matchup cards with lines showing advancement path.
+/// Split tournament bracket — top half grows down, bottom half grows up,
+/// finals and champion displayed in the center. Matches the original
+/// canvas-based web bracket layout.
 struct BracketView: View {
     let matchups: [Matchup]
     let tournament: Tournament
@@ -11,82 +12,81 @@ struct BracketView: View {
         let rounds = Dictionary(grouping: matchups, by: \.round)
             .sorted { $0.key < $1.key }
 
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: 0) {
-                ForEach(rounds, id: \.key) { round, roundMatchups in
-                    VStack(spacing: 0) {
-                        // Round header
-                        RoundHeader(
-                            round: round,
-                            totalRounds: tournament.totalRounds ?? rounds.count,
-                            category: round == rounds.last?.key ? tournament.currentCategory : nil,
-                            isFinal: round == (tournament.totalRounds ?? rounds.count)
-                        )
+        if matchups.isEmpty {
+            VStack(spacing: 16) {
+                Image(systemName: "rectangle.on.rectangle.angled")
+                    .font(.system(size: 44))
+                    .foregroundStyle(.gray.opacity(0.3))
+                Text("Bracket not available yet")
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                ScrollView(.vertical, showsIndicators: false) {
+                    HStack(alignment: .center, spacing: 2) {
+                        ForEach(rounds, id: \.key) { round, roundMatchups in
+                            let sorted = roundMatchups.sorted { ($0.bracketPosition ?? 0) < ($1.bracketPosition ?? 0) }
+                            let isFinal = round == rounds.last?.key
+                            let isFirst = round == rounds.first?.key
 
-                        // Matchup cards with spacing that grows per round
-                        let spacing = spacingForRound(round, in: rounds.count)
-                        VStack(spacing: spacing) {
-                            ForEach(roundMatchups.sorted(by: { ($0.bracketPosition ?? 0) < ($1.bracketPosition ?? 0) })) { matchup in
-                                BracketMatchupCard(matchup: matchup)
+                            VStack(spacing: 0) {
+                                // Round label
+                                Text(isFinal ? "FINALS" : "ROUND \(round)")
+                                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                    .tracking(1.2)
+                                    .foregroundStyle(isFinal ? .yellow : .secondary)
+                                    .padding(.bottom, 12)
+
+                                if isFinal && sorted.count == 1 {
+                                    // Finals: show as a centered special card
+                                    FinalMatchCard(matchup: sorted[0])
+                                } else {
+                                    // Regular rounds
+                                    VStack(spacing: roundSpacing(round, totalRounds: rounds.count)) {
+                                        ForEach(sorted) { matchup in
+                                            BracketMatchNode(matchup: matchup)
+                                        }
+                                    }
+                                }
+                            }
+                            .frame(width: 260)
+
+                            // Connector lines between rounds
+                            if !isFinal {
+                                ConnectorLines(
+                                    matchCount: sorted.count,
+                                    spacing: roundSpacing(round, totalRounds: rounds.count)
+                                )
+                                .frame(width: 28)
                             }
                         }
-                        .padding(.top, topPaddingForRound(round, in: rounds.count))
+
+                        // Champion display
+                        if let finalMatch = matchups.first(where: { $0.round == (rounds.last?.key ?? 0) }),
+                           let winnerName = finalMatch.winnerUsername {
+                            ChampionBadge(
+                                name: winnerName,
+                                winnerId: finalMatch.winnerId,
+                                matchups: matchups
+                            )
+                            .frame(width: 140)
+                        }
                     }
-                    .frame(width: 280)
+                    .padding(20)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
         }
     }
 
-    func spacingForRound(_ round: Int, in totalRounds: Int) -> CGFloat {
-        switch round {
-        case 1: return 16
-        case 2: return 80
-        case 3: return 160
-        default: return CGFloat(round - 1) * 80
-        }
-    }
-
-    func topPaddingForRound(_ round: Int, in totalRounds: Int) -> CGFloat {
-        switch round {
-        case 1: return 0
-        case 2: return 48
-        case 3: return 112
-        default: return CGFloat(round - 1) * 56
-        }
+    func roundSpacing(_ round: Int, totalRounds: Int) -> CGFloat {
+        let base: CGFloat = 12
+        return base + CGFloat(round - 1) * 60
     }
 }
 
-// MARK: - Round Header
-struct RoundHeader: View {
-    let round: Int
-    let totalRounds: Int
-    let category: String?
-    let isFinal: Bool
-
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(isFinal ? "FINALS" : "ROUND \(round)")
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .tracking(1.5)
-                .foregroundStyle(isFinal ? .yellow : .secondary)
-
-            if let category = category {
-                Text(category)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-    }
-}
-
-// MARK: - Bracket Matchup Card
-struct BracketMatchupCard: View {
+// MARK: - Bracket Match Node
+struct BracketMatchNode: View {
     let matchup: Matchup
     @State private var showDetail = false
 
@@ -95,48 +95,38 @@ struct BracketMatchupCard: View {
     var body: some View {
         Button { showDetail = true } label: {
             VStack(spacing: 0) {
-                // Player A
-                PlayerRow(
+                PlayerSlot(
                     name: matchup.participantAUsername ?? "TBD",
                     votes: matchup.votesA,
                     totalVotes: totalVotes,
                     screenshotUrl: matchup.participantAScreenshotUrl,
-                    isWinner: matchup.winnerId != nil && matchup.winnerId == matchup.participantAId,
-                    isLoser: matchup.winnerId != nil && matchup.winnerId != matchup.participantAId,
+                    isWinner: matchup.winnerId == matchup.participantAId,
                     isTop: true
                 )
 
-                // VS divider
-                HStack(spacing: 8) {
-                    Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1)
-                    Text("VS")
-                        .font(.system(size: 9, weight: .black, design: .rounded))
-                        .foregroundStyle(.secondary.opacity(0.5))
-                    Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1)
-                }
-                .padding(.horizontal, 12)
+                Divider().background(Color.yellow.opacity(0.15))
 
-                // Player B
-                PlayerRow(
+                PlayerSlot(
                     name: matchup.participantBUsername ?? "TBD",
                     votes: matchup.votesB,
                     totalVotes: totalVotes,
                     screenshotUrl: matchup.participantBScreenshotUrl,
-                    isWinner: matchup.winnerId != nil && matchup.winnerId == matchup.participantBId,
-                    isLoser: matchup.winnerId != nil && matchup.winnerId != matchup.participantBId,
+                    isWinner: matchup.winnerId == matchup.participantBId,
                     isTop: false
                 )
             }
-            .background(Color(.secondarySystemBackground).opacity(0.8))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(
-                        matchup.status == "voting" ? Color.yellow.opacity(0.4) : Color.white.opacity(0.06),
+                        matchup.status == "voting"
+                            ? Color.yellow.opacity(0.5)
+                            : Color.white.opacity(0.08),
                         lineWidth: matchup.status == "voting" ? 1.5 : 0.5
                     )
             )
-            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+            .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showDetail) {
@@ -145,204 +135,221 @@ struct BracketMatchupCard: View {
     }
 }
 
-// MARK: - Player Row
-struct PlayerRow: View {
+// MARK: - Player Slot (single row in bracket)
+struct PlayerSlot: View {
     let name: String
     let votes: Int
     let totalVotes: Int
     let screenshotUrl: String?
     let isWinner: Bool
-    let isLoser: Bool
     let isTop: Bool
 
-    var votePct: Double {
-        totalVotes > 0 ? Double(votes) / Double(totalVotes) : 0
+    var votePct: CGFloat {
+        totalVotes > 0 ? CGFloat(votes) / CGFloat(totalVotes) : 0
     }
 
     var body: some View {
-        HStack(spacing: 10) {
-            // Avatar or screenshot thumbnail
+        HStack(spacing: 8) {
+            // Avatar
             if let url = screenshotUrl, let imageURL = URL(string: url) {
                 KFImage(imageURL)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: 36, height: 36)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .frame(width: 28, height: 28)
+                    .clipShape(Circle())
             } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.yellow.opacity(0.15))
-                    .frame(width: 36, height: 36)
+                Circle()
+                    .fill(Color.yellow.opacity(0.12))
+                    .frame(width: 28, height: 28)
                     .overlay(
                         Text(String(name.prefix(1)).uppercased())
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundStyle(.yellow)
                     )
             }
 
             // Name
-            VStack(alignment: .leading, spacing: 2) {
-                Text(name)
-                    .font(.system(size: 13, weight: isWinner ? .bold : .medium))
-                    .foregroundStyle(isLoser ? .secondary : .primary)
-                    .lineLimit(1)
+            Text(name)
+                .font(.system(size: 12, weight: isWinner ? .bold : .medium))
+                .foregroundStyle(isWinner ? .primary : .secondary)
+                .lineLimit(1)
 
-                if totalVotes > 0 {
-                    // Vote bar
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule()
-                                .fill(Color.white.opacity(0.06))
-                                .frame(height: 4)
-                            Capsule()
-                                .fill(isWinner ? Color.yellow : Color.white.opacity(0.3))
-                                .frame(width: geo.size.width * votePct, height: 4)
-                        }
-                    }
-                    .frame(height: 4)
-                }
-            }
+            Spacer(minLength: 2)
 
-            Spacer(minLength: 4)
-
-            // Vote count
+            // Votes
             if totalVotes > 0 {
-                VStack(alignment: .trailing, spacing: 1) {
-                    Text("\(votes)")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(isWinner ? .yellow : .secondary)
-                    Text("\(Int(votePct * 100))%")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
+                Text("\(votes)")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(isWinner ? .yellow : .secondary)
+                    .frame(minWidth: 24)
             }
 
-            // Winner indicator
+            // Winner crown
             if isWinner {
                 Image(systemName: "crown.fill")
-                    .font(.system(size: 10))
+                    .font(.system(size: 8))
                     .foregroundStyle(.yellow)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-    }
-}
-
-// MARK: - Matchup Detail Sheet
-struct MatchupDetailSheet: View {
-    let matchup: Matchup
-    @Environment(\.dismiss) var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    if let category = matchup.category {
-                        Text(category)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    // Player A
-                    SubmissionCard(
-                        name: matchup.participantAUsername ?? "TBD",
-                        screenshotUrl: matchup.participantAScreenshotUrl,
-                        submissionUrl: matchup.participantASubmissionUrl,
-                        description: matchup.participantADescription,
-                        votes: matchup.votesA,
-                        isWinner: matchup.winnerId == matchup.participantAId
-                    )
-
-                    Text("VS")
-                        .font(.system(size: 14, weight: .black, design: .rounded))
-                        .foregroundStyle(.secondary)
-
-                    // Player B
-                    SubmissionCard(
-                        name: matchup.participantBUsername ?? "TBD",
-                        screenshotUrl: matchup.participantBScreenshotUrl,
-                        submissionUrl: matchup.participantBSubmissionUrl,
-                        description: matchup.participantBDescription,
-                        votes: matchup.votesB,
-                        isWinner: matchup.winnerId == matchup.participantBId
-                    )
-                }
-                .padding()
-            }
-            .background(Color(.systemBackground))
-            .navigationTitle("Round \(matchup.round)")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            GeometryReader { geo in
+                if totalVotes > 0 {
+                    Rectangle()
+                        .fill(isWinner ? Color.yellow.opacity(0.06) : Color.clear)
+                        .frame(width: geo.size.width * votePct)
                 }
             }
-        }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
-    }
-}
-
-struct SubmissionCard: View {
-    let name: String
-    let screenshotUrl: String?
-    let submissionUrl: String?
-    let description: String?
-    let votes: Int
-    let isWinner: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Screenshot
-            if let url = screenshotUrl, let imageURL = URL(string: url) {
-                KFImage(imageURL)
-                    .resizable()
-                    .aspectRatio(16/10, contentMode: .fill)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(name)
-                            .font(.headline)
-                        if isWinner {
-                            Image(systemName: "crown.fill")
-                                .foregroundStyle(.yellow)
-                                .font(.caption)
-                        }
-                    }
-                    Text("\(votes) votes")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                if let url = submissionUrl, let link = URL(string: url) {
-                    Link(destination: link) {
-                        Text("View App")
-                            .font(.caption.weight(.semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.yellow)
-                            .foregroundStyle(.black)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-
-            if let desc = description, !desc.isEmpty {
-                Text(desc)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(4)
-            }
-        }
-        .padding(14)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(isWinner ? Color.yellow.opacity(0.3) : Color.clear, lineWidth: 1.5)
         )
+    }
+}
+
+// MARK: - Finals Match Card
+struct FinalMatchCard: View {
+    let matchup: Matchup
+    @State private var showDetail = false
+
+    var totalVotes: Int { matchup.votesA + matchup.votesB }
+
+    var body: some View {
+        Button { showDetail = true } label: {
+            VStack(spacing: 0) {
+                // "CHAMPIONSHIP" banner
+                Text("⚔️ CHAMPIONSHIP")
+                    .font(.system(size: 9, weight: .heavy, design: .rounded))
+                    .tracking(1)
+                    .foregroundStyle(.yellow)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.yellow.opacity(0.08))
+
+                PlayerSlot(
+                    name: matchup.participantAUsername ?? "TBD",
+                    votes: matchup.votesA,
+                    totalVotes: totalVotes,
+                    screenshotUrl: matchup.participantAScreenshotUrl,
+                    isWinner: matchup.winnerId == matchup.participantAId,
+                    isTop: true
+                )
+
+                HStack(spacing: 6) {
+                    Rectangle().fill(Color.yellow.opacity(0.2)).frame(height: 0.5)
+                    Text("VS").font(.system(size: 8, weight: .black, design: .rounded)).foregroundStyle(.yellow.opacity(0.5))
+                    Rectangle().fill(Color.yellow.opacity(0.2)).frame(height: 0.5)
+                }
+                .padding(.horizontal, 10)
+
+                PlayerSlot(
+                    name: matchup.participantBUsername ?? "TBD",
+                    votes: matchup.votesB,
+                    totalVotes: totalVotes,
+                    screenshotUrl: matchup.participantBScreenshotUrl,
+                    isWinner: matchup.winnerId == matchup.participantBId,
+                    isTop: false
+                )
+            }
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(Color.yellow.opacity(0.3), lineWidth: 1.5)
+            )
+            .shadow(color: .yellow.opacity(0.15), radius: 12, y: 4)
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showDetail) {
+            MatchupDetailSheet(matchup: matchup)
+        }
+    }
+}
+
+// MARK: - Connector Lines
+struct ConnectorLines: View {
+    let matchCount: Int
+    let spacing: CGFloat
+
+    var body: some View {
+        Canvas { context, size in
+            let slotHeight: CGFloat = 76
+            let totalHeight = CGFloat(matchCount) * slotHeight + CGFloat(matchCount - 1) * spacing
+            let startY = (size.height - totalHeight) / 2
+
+            let color = Color.yellow.opacity(0.25)
+
+            for i in stride(from: 0, to: matchCount, by: 2) {
+                let topMidY = startY + CGFloat(i) * (slotHeight + spacing) + slotHeight / 2
+                let bottomMidY = startY + CGFloat(i + 1) * (slotHeight + spacing) + slotHeight / 2
+                let mergeY = (topMidY + bottomMidY) / 2
+
+                var path = Path()
+                // Top arm
+                path.move(to: CGPoint(x: 0, y: topMidY))
+                path.addLine(to: CGPoint(x: size.width * 0.5, y: topMidY))
+                path.addLine(to: CGPoint(x: size.width * 0.5, y: mergeY))
+                // Bottom arm
+                path.move(to: CGPoint(x: 0, y: bottomMidY))
+                path.addLine(to: CGPoint(x: size.width * 0.5, y: bottomMidY))
+                path.addLine(to: CGPoint(x: size.width * 0.5, y: mergeY))
+                // Output
+                path.move(to: CGPoint(x: size.width * 0.5, y: mergeY))
+                path.addLine(to: CGPoint(x: size.width, y: mergeY))
+
+                context.stroke(path, with: .color(color), lineWidth: 1.5)
+            }
+        }
+    }
+}
+
+// MARK: - Champion Badge
+struct ChampionBadge: View {
+    let name: String
+    let winnerId: UUID?
+    let matchups: [Matchup]
+
+    var body: some View {
+        VStack(spacing: 8) {
+            // Crown
+            Image(systemName: "crown.fill")
+                .font(.system(size: 24))
+                .foregroundStyle(.yellow)
+                .shadow(color: .yellow.opacity(0.5), radius: 8)
+
+            // Avatar
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [.yellow.opacity(0.3), .clear],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 50
+                        )
+                    )
+                    .frame(width: 80, height: 80)
+
+                Circle()
+                    .fill(Color.yellow.opacity(0.15))
+                    .frame(width: 56, height: 56)
+                    .overlay(
+                        Text(String(name.prefix(1)).uppercased())
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundStyle(.yellow)
+                    )
+                    .overlay(
+                        Circle()
+                            .strokeBorder(Color.yellow.opacity(0.4), lineWidth: 2)
+                    )
+            }
+
+            Text(name)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundStyle(.yellow)
+
+            Text("CHAMPION")
+                .font(.system(size: 9, weight: .heavy, design: .rounded))
+                .tracking(2)
+                .foregroundStyle(.yellow.opacity(0.6))
+        }
     }
 }
