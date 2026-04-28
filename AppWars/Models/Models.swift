@@ -82,6 +82,7 @@ struct Participant: Codable, Identifiable {
     var matchesWon: Int
     var matchesLost: Int
     var totalVotesReceived: Int
+    var createdByEmail: String?
 
     var isActive: Bool { status == "active" }
 
@@ -93,6 +94,7 @@ struct Participant: Codable, Identifiable {
         case matchesWon = "matches_won"
         case matchesLost = "matches_lost"
         case totalVotesReceived = "total_votes_received"
+        case createdByEmail = "created_by_email"
     }
 }
 

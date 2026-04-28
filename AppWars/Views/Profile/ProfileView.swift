@@ -236,18 +236,46 @@ struct ProfileView: View {
         guard let email = auth.profile?.email else { statsLoaded = true; return }
 
         do {
-            // Only get THIS user's participants by matching their email
-            // Since we don't store created_by on participants in the new schema,
-            // we show global stats for now (all participants).
-            // TODO: filter by user once participant-to-user linking is implemented
+            // Get only THIS user's participants
+            let myParticipants: [Participant] = try await supabase.from("participants")
+                .select()
+                .eq("created_by_email", value: email)
+                .execute()
+                .value
 
-            // For now, show zeros for a user who hasn't competed
-            // The profile stats will be accurate once we link participants to auth users
-            tournamentsEntered = 0
-            tournamentsWon = 0
-            matchesWon = 0
-            matchesLost = 0
-            totalVotes = 0
+            let myParticipantIds = Set(myParticipants.map { $0.id })
+            tournamentsEntered = Set(myParticipants.map { $0.tournamentId }).count
+
+            if myParticipantIds.isEmpty {
+                statsLoaded = true
+                return
+            }
+
+            // Get completed matchups
+            let matchups: [Matchup] = try await supabase.from("matchups")
+                .select()
+                .eq("status", value: "completed")
+                .execute()
+                .value
+
+            var w = 0, l = 0, v = 0, tw = 0
+            for m in matchups {
+                guard let winnerId = m.winnerId else { continue }
+
+                // Check if user is participant A
+                if let aId = m.participantAId, myParticipantIds.contains(aId) {
+                    if winnerId == aId { w += 1 } else { l += 1 }
+                    v += m.votesA
+                }
+                // Check if user is participant B
+                if let bId = m.participantBId, myParticipantIds.contains(bId) {
+                    if winnerId == bId { w += 1 } else { l += 1 }
+                    v += m.votesB
+                }
+            }
+            matchesWon = w
+            matchesLost = l
+            totalVotes = v
         } catch {
             print("Failed to load stats: \(error)")
         }
