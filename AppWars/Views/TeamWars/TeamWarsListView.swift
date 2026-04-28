@@ -26,6 +26,7 @@ struct TeamWarsListView: View {
                         .padding(.top, 60)
                     } else {
                         ForEach(wars) { war in
+                            NavigationLink(destination: TeamWarDetailView(warId: war.id)) {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(war.name)
                                     .font(.headline)
@@ -45,6 +46,8 @@ struct TeamWarsListView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding()
                             .background(Color(.secondarySystemBackground))
+                            }
+                            .buttonStyle(.plain)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
                     }

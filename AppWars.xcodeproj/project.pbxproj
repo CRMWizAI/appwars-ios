@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		03C7C7B4DED184F89D5AF14E /* AppWarsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9536977EC242808356D96D31 /* AppWarsApp.swift */; };
+		051EE321297AD8B397AC35A8 /* TeamWarDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47CEA67E50E1F31EB3DDB5F /* TeamWarDetailView.swift */; };
 		106AFC9C2B1B8B6E35EC62FC /* SponsorsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDFEFF485C6E015E463A1B6 /* SponsorsTab.swift */; };
 		1215068A89C9CA4D473F2F24 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93075731F15B5B68085CBD79 /* LoginView.swift */; };
 		1305F29FF5E1B3191B92FA1F /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ED3083C584BE42BCE233528 /* AuthService.swift */; };
@@ -29,6 +30,7 @@
 		B0D8D92249D0D0C702432D6D /* PortfolioManageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822C686F841D18D68667B895 /* PortfolioManageView.swift */; };
 		B90719AE57F846F3508C50E9 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EB715352F82287355C2718 /* HomeView.swift */; };
 		C3A9247825E18205BE99D5FF /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A3719086008BDB5BE4C1E68A /* Supabase */; };
+		CB1ABE3219FABAD2771A5A08 /* AdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDA6FFBFD3F971628ED4B513 /* AdminView.swift */; };
 		D3619973A37B2D38CEF7BC98 /* MatchupDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE1B35B504BD2CDDC0AB40 /* MatchupDetailSheet.swift */; };
 		DD6BC3FFD25CC6D5D21DA737 /* TournamentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */; };
 		F572432EEDD477EF3BB6A951 /* MatchupVotingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEED7AE15C469953031E545E /* MatchupVotingSheet.swift */; };
@@ -59,6 +61,8 @@
 		BACE1B35B504BD2CDDC0AB40 /* MatchupDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchupDetailSheet.swift; sourceTree = "<group>"; };
 		BE8768C75BE74DCAFB06C544 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		C45F3A0DF3B0A1D56BCE38E5 /* BracketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BracketView.swift; sourceTree = "<group>"; };
+		CDA6FFBFD3F971628ED4B513 /* AdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminView.swift; sourceTree = "<group>"; };
+		D47CEA67E50E1F31EB3DDB5F /* TeamWarDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamWarDetailView.swift; sourceTree = "<group>"; };
 		DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerEffect.swift; sourceTree = "<group>"; };
 		DEED7AE15C469953031E545E /* MatchupVotingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchupVotingSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -104,6 +108,7 @@
 		403B3A99A52742F060F47827 /* TeamWars */ = {
 			isa = PBXGroup;
 			children = (
+				D47CEA67E50E1F31EB3DDB5F /* TeamWarDetailView.swift */,
 				565197040FE338BF55C84F67 /* TeamWarsListView.swift */,
 			);
 			path = TeamWars;
@@ -161,6 +166,7 @@
 		8DDAFDA29387ABEC5F30EBFC /* Admin */ = {
 			isa = PBXGroup;
 			children = (
+				CDA6FFBFD3F971628ED4B513 /* AdminView.swift */,
 			);
 			path = Admin;
 			sourceTree = "<group>";
@@ -316,6 +322,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB1ABE3219FABAD2771A5A08 /* AdminView.swift in Sources */,
 				03C7C7B4DED184F89D5AF14E /* AppWarsApp.swift in Sources */,
 				1305F29FF5E1B3191B92FA1F /* AuthService.swift in Sources */,
 				1D66EDDEC4FAF408A86733C5 /* BracketView.swift in Sources */,
@@ -336,6 +343,7 @@
 				106AFC9C2B1B8B6E35EC62FC /* SponsorsTab.swift in Sources */,
 				A7983DF7545FF26F0D5E42E4 /* SubmitBuildView.swift in Sources */,
 				97CAE3D9D8417BC60C89FF93 /* SupabaseClient.swift in Sources */,
+				051EE321297AD8B397AC35A8 /* TeamWarDetailView.swift in Sources */,
 				F9BDECFA155E09266521899C /* TeamWarsListView.swift in Sources */,
 				DD6BC3FFD25CC6D5D21DA737 /* TournamentDetailView.swift in Sources */,
 				28ED8E128D5F8110920DD7AA /* VoteNowTab.swift in Sources */,

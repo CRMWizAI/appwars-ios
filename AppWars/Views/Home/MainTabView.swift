@@ -4,6 +4,8 @@ struct MainTabView: View {
     @EnvironmentObject var auth: AuthService
     @State private var selectedTab = 0
 
+    var isAdmin: Bool { auth.profile?.role == "admin" }
+
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView()
@@ -40,6 +42,15 @@ struct MainTabView: View {
                     Text("Profile")
                 }
                 .tag(4)
+
+            if isAdmin {
+                AdminView()
+                    .tabItem {
+                        Image(systemName: "gear")
+                        Text("Admin")
+                    }
+                    .tag(5)
+            }
         }
         .tint(.yellow)
         .preferredColorScheme(.dark)
