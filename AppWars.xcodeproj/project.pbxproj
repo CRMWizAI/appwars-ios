@@ -23,6 +23,7 @@
 		4A7440377221DC1B773A04B5 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2219E08B9F9447104C2DF26A /* LeaderboardView.swift */; };
 		4C8104EFA677F554718C648B /* PrizesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD21C10598DD95EE654E7CF /* PrizesTab.swift */; };
 		69290F8996190118AC94BB84 /* DateHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E38E12D2D3FB1E8F7E07C8A /* DateHelpers.swift */; };
+		78344307A1643686A7517283 /* SimpleBracketList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFD23246D571C912F3C7F44 /* SimpleBracketList.swift */; };
 		81413A60BE79189B30858009 /* ChampionCelebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 804CD5AE1023EF1B98757673 /* ChampionCelebration.swift */; };
 		84DEBFE9EC36D143E7710696 /* ShimmerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */; };
 		915D7E891938D4D24F56B0A7 /* RoundCountdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D788889D8821F4E4948149 /* RoundCountdown.swift */; };
@@ -41,6 +42,7 @@
 /* Begin PBXFileReference section */
 		07CC7FAA0839FF2DBED6E118 /* AppWars.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AppWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CDFEFF485C6E015E463A1B6 /* SponsorsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsorsTab.swift; sourceTree = "<group>"; };
+		1BFD23246D571C912F3C7F44 /* SimpleBracketList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBracketList.swift; sourceTree = "<group>"; };
 		2219E08B9F9447104C2DF26A /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
 		2AD21C10598DD95EE654E7CF /* PrizesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrizesTab.swift; sourceTree = "<group>"; };
 		4BE96A4D83C5AAF4E0A7E93A /* AppWars.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppWars.entitlements; sourceTree = "<group>"; };
@@ -207,6 +209,7 @@
 				BACE1B35B504BD2CDDC0AB40 /* MatchupDetailSheet.swift */,
 				DEED7AE15C469953031E545E /* MatchupVotingSheet.swift */,
 				2AD21C10598DD95EE654E7CF /* PrizesTab.swift */,
+				1BFD23246D571C912F3C7F44 /* SimpleBracketList.swift */,
 				0CDFEFF485C6E015E463A1B6 /* SponsorsTab.swift */,
 				97D841492D73B91AAE8EEEC1 /* SubmitBuildView.swift */,
 				66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */,
@@ -344,6 +347,7 @@
 				19C2EC3DA4131C60FEE3043E /* ProfileView.swift in Sources */,
 				915D7E891938D4D24F56B0A7 /* RoundCountdown.swift in Sources */,
 				84DEBFE9EC36D143E7710696 /* ShimmerEffect.swift in Sources */,
+				78344307A1643686A7517283 /* SimpleBracketList.swift in Sources */,
 				106AFC9C2B1B8B6E35EC62FC /* SponsorsTab.swift in Sources */,
 				A7983DF7545FF26F0D5E42E4 /* SubmitBuildView.swift in Sources */,
 				97CAE3D9D8417BC60C89FF93 /* SupabaseClient.swift in Sources */,

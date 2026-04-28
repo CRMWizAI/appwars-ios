@@ -111,7 +111,7 @@ struct TournamentDetailView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        BracketView(matchups: matchups, tournament: tournament)
+                        SimpleBracketList(matchups: matchups, tournament: tournament)
                     }
                 case 1: VoteNowTab(tournament: tournament, matchups: matchups)
                 case 2: ChatTab(tournamentId: tournament.id)
