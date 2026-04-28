@@ -56,6 +56,7 @@ struct VoteNowTab: View {
 struct VoteMatchupCard: View {
     let matchup: Matchup
     let tournament: Tournament
+    @EnvironmentObject var auth: AuthService
     @State private var showDetail = false
     @State private var hasVoted = false
     @State private var votedFor: UUID?
