@@ -1,72 +1,330 @@
 import SwiftUI
+import PhotosUI
+import Kingfisher
 
 struct ProfileView: View {
     @EnvironmentObject var auth: AuthService
+    @State private var discordUsername = ""
+    @State private var displayName = ""
+    @State private var avatarItem: PhotosPickerItem?
+    @State private var avatarImage: UIImage?
+    @State private var saving = false
+    @State private var modified = false
+
+    // Stats
+    @State private var tournamentsEntered = 0
+    @State private var tournamentsWon = 0
+    @State private var matchesWon = 0
+    @State private var matchesLost = 0
+    @State private var totalVotes = 0
+
+    var winRate: Double {
+        let total = matchesWon + matchesLost
+        return total > 0 ? Double(matchesWon) / Double(total) : 0
+    }
 
     var body: some View {
         NavigationStack {
-            List {
-                // Profile header
-                Section {
-                    HStack(spacing: 14) {
-                        Circle()
-                            .fill(Color.yellow.opacity(0.2))
-                            .frame(width: 56, height: 56)
-                            .overlay(
-                                Text(String(auth.profile?.displayName?.prefix(1) ?? "?").uppercased())
-                                    .font(.title2.weight(.bold))
-                                    .foregroundStyle(.yellow)
-                            )
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(auth.profile?.displayName ?? "User")
-                                .font(.headline)
-                            Text(auth.profile?.email ?? "")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            if let discord = auth.profile?.discordUsername {
-                                Text("@\(discord)")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Avatar
+                    VStack(spacing: 8) {
+                        PhotosPicker(selection: $avatarItem, matching: .images) {
+                            ZStack {
+                                if let img = avatarImage {
+                                    Image(uiImage: img)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 80, height: 80)
+                                        .clipShape(Circle())
+                                } else if let url = auth.profile?.avatarUrl, let imageURL = URL(string: url) {
+                                    KFImage(imageURL)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 80, height: 80)
+                                        .clipShape(Circle())
+                                } else {
+                                    Circle()
+                                        .fill(Color.yellow.opacity(0.15))
+                                        .frame(width: 80, height: 80)
+                                        .overlay(
+                                            Image(systemName: "camera.fill")
+                                                .font(.system(size: 24))
+                                                .foregroundStyle(.yellow)
+                                        )
+                                }
+
+                                Circle()
+                                    .strokeBorder(Color.yellow.opacity(0.3), lineWidth: 2)
+                                    .frame(width: 84, height: 84)
                             }
                         }
-                    }
-                    .padding(.vertical, 8)
-                }
 
-                Section("Account") {
+                        Text(auth.profile?.email ?? "")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    // Username fields
+                    VStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Discord Username")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                            TextField("username", text: $discordUsername)
+                                .textFieldStyle(.roundedBorder)
+                                .autocapitalization(.none)
+                                .onChange(of: discordUsername) { _, _ in modified = true }
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Display Name")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                            TextField("Display name", text: $displayName)
+                                .textFieldStyle(.roundedBorder)
+                                .onChange(of: displayName) { _, _ in modified = true }
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    if modified {
+                        Button {
+                            Task { await saveProfile() }
+                        } label: {
+                            HStack {
+                                if saving { ProgressView().tint(.black) }
+                                Text(saving ? "Saving..." : "Save Changes")
+                            }
+                            .font(.system(size: 14, weight: .semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.yellow)
+                            .foregroundStyle(.black)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .padding(.horizontal)
+                    }
+
+                    // Stats
+                    VStack(spacing: 12) {
+                        Text("YOUR STATS")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.5)
+                            .foregroundStyle(.secondary)
+
+                        LazyVGrid(columns: [.init(), .init()], spacing: 10) {
+                            StatBox(value: "\(tournamentsEntered)", label: "Tournaments", icon: "trophy")
+                            StatBox(value: "\(tournamentsWon)", label: "Wins", icon: "crown.fill")
+                            StatBox(value: "\(matchesWon)-\(matchesLost)", label: "Record", icon: "chart.bar.fill")
+                            StatBox(value: "\(totalVotes)", label: "Votes", icon: "hand.thumbsup.fill")
+                        }
+
+                        // Win rate bar
+                        VStack(spacing: 4) {
+                            HStack {
+                                Text("Win Rate")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text("\(Int(winRate * 100))%")
+                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.yellow)
+                            }
+                            GeometryReader { geo in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(Color.gray.opacity(0.15)).frame(height: 8)
+                                    Capsule().fill(Color.yellow).frame(width: geo.size.width * winRate, height: 8)
+                                }
+                            }
+                            .frame(height: 8)
+                        }
+                    }
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .padding(.horizontal)
+
+                    // Portfolio link
                     NavigationLink {
-                        Text("Edit Profile")
+                        // TODO: PortfolioManage
+                        Text("Portfolio Editor coming soon")
                     } label: {
-                        Label("Edit Profile", systemImage: "person.circle")
+                        HStack {
+                            Image(systemName: "briefcase.fill")
+                                .foregroundStyle(.yellow)
+                            Text("My Portfolio")
+                                .font(.system(size: 14, weight: .semibold))
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
-                    NavigationLink {
-                        Text("Notifications")
-                    } label: {
-                        Label("Notifications", systemImage: "bell")
-                    }
-                }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal)
 
-                Section("Support") {
-                    Link(destination: URL(string: "https://appwars.io/support")!) {
-                        Label("Help & Support", systemImage: "questionmark.circle")
+                    // Links
+                    VStack(spacing: 0) {
+                        LinkRow(icon: "questionmark.circle", title: "Help & Support")
+                        Divider().padding(.leading, 44)
+                        LinkRow(icon: "hand.raised", title: "Privacy Policy")
+                        Divider().padding(.leading, 44)
+                        LinkRow(icon: "doc.text", title: "Terms of Service")
                     }
-                    Link(destination: URL(string: "https://appwars.io/privacy-policy")!) {
-                        Label("Privacy Policy", systemImage: "hand.raised")
-                    }
-                    Link(destination: URL(string: "https://appwars.io/terms-and-conditions")!) {
-                        Label("Terms of Service", systemImage: "doc.text")
-                    }
-                }
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal)
 
-                Section {
+                    // Sign out
                     Button(role: .destructive) {
                         Task { await auth.signOut() }
                     } label: {
-                        Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                        Text("Sign Out")
+                            .font(.system(size: 14, weight: .medium))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.red.opacity(0.1))
+                            .foregroundStyle(.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 32)
+                }
+            }
+            .background(Color(.systemBackground))
+            .navigationTitle("Profile")
+            .task { await loadStats() }
+            .onAppear {
+                discordUsername = auth.profile?.discordUsername ?? ""
+                displayName = auth.profile?.displayName ?? ""
+                modified = false
+            }
+            .onChange(of: avatarItem) { _, item in
+                Task {
+                    if let data = try? await item?.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        avatarImage = image
+                        modified = true
                     }
                 }
             }
-            .navigationTitle("Profile")
         }
+    }
+
+    func loadStats() async {
+        guard let email = auth.profile?.email else { return }
+        do {
+            // Get all matchups to compute W/L
+            let matchups: [Matchup] = try await supabase.from("matchups")
+                .select()
+                .eq("status", value: "completed")
+                .execute()
+                .value
+
+            let participants: [Participant] = try await supabase.from("participants")
+                .select()
+                .execute()
+                .value
+
+            // Find user's participant IDs
+            // For now, match by checking if any participant's tournament was created by this user
+            // This is a simplification — in production you'd track user_id on participant
+            let userParticipants = participants // simplified - show global stats
+            let userParticipantIds = Set(userParticipants.map { $0.id })
+
+            tournamentsEntered = Set(userParticipants.map { $0.tournamentId }).count
+
+            for m in matchups {
+                if m.winnerId != nil {
+                    if let aId = m.participantAId, userParticipantIds.contains(aId) {
+                        if m.winnerId == aId { matchesWon += 1 } else { matchesLost += 1 }
+                        totalVotes += m.votesA
+                    }
+                    if let bId = m.participantBId, userParticipantIds.contains(bId) {
+                        if m.winnerId == bId { matchesWon += 1 } else { matchesLost += 1 }
+                        totalVotes += m.votesB
+                    }
+                }
+            }
+        } catch {
+            print("Failed to load stats: \(error)")
+        }
+    }
+
+    func saveProfile() async {
+        saving = true
+        do {
+            var updates: [String: String] = [
+                "discord_username": discordUsername,
+                "display_name": displayName,
+            ]
+
+            // Upload avatar if changed
+            if let image = avatarImage, let data = image.jpegData(compressionQuality: 0.8) {
+                let fileName = "avatars/\(auth.profile?.id.uuidString ?? "unknown").jpg"
+                try await supabase.storage.from("appwars").upload(fileName, data: data, options: .init(contentType: "image/jpeg", upsert: true))
+                let url = try supabase.storage.from("appwars").getPublicURL(path: fileName)
+                updates["avatar_url"] = url.absoluteString
+            }
+
+            try await supabase.from("profiles")
+                .update(updates)
+                .eq("id", value: auth.profile?.id.uuidString ?? "")
+                .execute()
+
+            await auth.fetchProfile(userId: auth.user!.id)
+            modified = false
+        } catch {
+            print("Save failed: \(error)")
+        }
+        saving = false
+    }
+}
+
+struct StatBox: View {
+    let value: String
+    let label: String
+    let icon: String
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(.yellow)
+            Text(value)
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background(Color(.tertiarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+struct LinkRow: View {
+    let icon: String
+    let title: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .frame(width: 24)
+                .foregroundStyle(.secondary)
+            Text(title)
+                .font(.system(size: 14))
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }

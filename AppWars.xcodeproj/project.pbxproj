@@ -21,9 +21,11 @@
 		3A80D48E429D6F68A5B4B4F8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = FE87FC919BACDB02644C9A2B /* Kingfisher */; };
 		4A7440377221DC1B773A04B5 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2219E08B9F9447104C2DF26A /* LeaderboardView.swift */; };
 		4C8104EFA677F554718C648B /* PrizesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD21C10598DD95EE654E7CF /* PrizesTab.swift */; };
+		81413A60BE79189B30858009 /* ChampionCelebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 804CD5AE1023EF1B98757673 /* ChampionCelebration.swift */; };
 		84DEBFE9EC36D143E7710696 /* ShimmerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */; };
 		915D7E891938D4D24F56B0A7 /* RoundCountdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D788889D8821F4E4948149 /* RoundCountdown.swift */; };
 		97CAE3D9D8417BC60C89FF93 /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 508C501BE801948404A5489D /* SupabaseClient.swift */; };
+		A7983DF7545FF26F0D5E42E4 /* SubmitBuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D841492D73B91AAE8EEEC1 /* SubmitBuildView.swift */; };
 		B0D8D92249D0D0C702432D6D /* PortfolioManageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822C686F841D18D68667B895 /* PortfolioManageView.swift */; };
 		B90719AE57F846F3508C50E9 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EB715352F82287355C2718 /* HomeView.swift */; };
 		C3A9247825E18205BE99D5FF /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A3719086008BDB5BE4C1E68A /* Supabase */; };
@@ -45,9 +47,11 @@
 		648E2EECFA5022632D9CBC5C /* VoteNowTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoteNowTab.swift; sourceTree = "<group>"; };
 		66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TournamentDetailView.swift; sourceTree = "<group>"; };
 		77D788889D8821F4E4948149 /* RoundCountdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCountdown.swift; sourceTree = "<group>"; };
+		804CD5AE1023EF1B98757673 /* ChampionCelebration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChampionCelebration.swift; sourceTree = "<group>"; };
 		822C686F841D18D68667B895 /* PortfolioManageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioManageView.swift; sourceTree = "<group>"; };
 		93075731F15B5B68085CBD79 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		9536977EC242808356D96D31 /* AppWarsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWarsApp.swift; sourceTree = "<group>"; };
+		97D841492D73B91AAE8EEEC1 /* SubmitBuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmitBuildView.swift; sourceTree = "<group>"; };
 		988E67161AAB1C1C8D4FF0DE /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		A3EB715352F82287355C2718 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		B3B4B1CD707BFC8C5532F417 /* NotificationBellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationBellView.swift; sourceTree = "<group>"; };
@@ -190,10 +194,12 @@
 			isa = PBXGroup;
 			children = (
 				C45F3A0DF3B0A1D56BCE38E5 /* BracketView.swift */,
+				804CD5AE1023EF1B98757673 /* ChampionCelebration.swift */,
 				BACE1B35B504BD2CDDC0AB40 /* MatchupDetailSheet.swift */,
 				DEED7AE15C469953031E545E /* MatchupVotingSheet.swift */,
 				2AD21C10598DD95EE654E7CF /* PrizesTab.swift */,
 				0CDFEFF485C6E015E463A1B6 /* SponsorsTab.swift */,
+				97D841492D73B91AAE8EEEC1 /* SubmitBuildView.swift */,
 				66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */,
 				648E2EECFA5022632D9CBC5C /* VoteNowTab.swift */,
 			);
@@ -313,6 +319,7 @@
 				03C7C7B4DED184F89D5AF14E /* AppWarsApp.swift in Sources */,
 				1305F29FF5E1B3191B92FA1F /* AuthService.swift in Sources */,
 				1D66EDDEC4FAF408A86733C5 /* BracketView.swift in Sources */,
+				81413A60BE79189B30858009 /* ChampionCelebration.swift in Sources */,
 				B90719AE57F846F3508C50E9 /* HomeView.swift in Sources */,
 				4A7440377221DC1B773A04B5 /* LeaderboardView.swift in Sources */,
 				1215068A89C9CA4D473F2F24 /* LoginView.swift in Sources */,
@@ -327,6 +334,7 @@
 				915D7E891938D4D24F56B0A7 /* RoundCountdown.swift in Sources */,
 				84DEBFE9EC36D143E7710696 /* ShimmerEffect.swift in Sources */,
 				106AFC9C2B1B8B6E35EC62FC /* SponsorsTab.swift in Sources */,
+				A7983DF7545FF26F0D5E42E4 /* SubmitBuildView.swift in Sources */,
 				97CAE3D9D8417BC60C89FF93 /* SupabaseClient.swift in Sources */,
 				F9BDECFA155E09266521899C /* TeamWarsListView.swift in Sources */,
 				DD6BC3FFD25CC6D5D21DA737 /* TournamentDetailView.swift in Sources */,

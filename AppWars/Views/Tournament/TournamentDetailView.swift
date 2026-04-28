@@ -6,6 +6,17 @@ struct TournamentDetailView: View {
     @State private var selectedTab = 0
     @State private var matchups: [Matchup] = []
     @State private var loading = true
+    @State private var showChampion = false
+
+    var champion: (name: String, avatarUrl: String?)? {
+        guard tournament.isCompleted,
+              let finals = matchups.first(where: { $0.round == (tournament.totalRounds ?? 3) }),
+              let winnerName = finals.winnerUsername else { return nil }
+        let avatarUrl = finals.winnerId == finals.participantAId
+            ? finals.participantAScreenshotUrl
+            : finals.participantBScreenshotUrl
+        return (winnerName, avatarUrl)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -104,6 +115,27 @@ struct TournamentDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .task { await loadMatchups() }
+        .onChange(of: matchups.count) { _, _ in
+            if champion != nil && !showChampion {
+                let key = "champion_shown_\(tournament.id)"
+                if UserDefaults.standard.bool(forKey: key) == false {
+                    UserDefaults.standard.set(true, forKey: key)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showChampion = true
+                    }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showChampion) {
+            if let champ = champion {
+                ChampionCelebration(
+                    tournament: tournament,
+                    winnerName: champ.name,
+                    winnerAvatarUrl: champ.avatarUrl,
+                    onDismiss: { showChampion = false }
+                )
+            }
+        }
     }
 
     func loadMatchups() async {
