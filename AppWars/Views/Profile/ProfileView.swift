@@ -10,6 +10,9 @@ struct ProfileView: View {
     @State private var avatarImage: UIImage?
     @State private var saving = false
     @State private var modified = false
+    @FocusState private var focusedField: Field?
+
+    enum Field { case discord, displayName }
 
     // Stats
     @State private var tournamentsEntered = 0
@@ -17,6 +20,7 @@ struct ProfileView: View {
     @State private var matchesWon = 0
     @State private var matchesLost = 0
     @State private var totalVotes = 0
+    @State private var statsLoaded = false
 
     var winRate: Double {
         let total = matchesWon + matchesLost
@@ -73,7 +77,11 @@ struct ProfileView: View {
                                 .foregroundStyle(.secondary)
                             TextField("username", text: $discordUsername)
                                 .textFieldStyle(.roundedBorder)
-                                .autocapitalization(.none)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                                .focused($focusedField, equals: .discord)
+                                .submitLabel(.next)
+                                .onSubmit { focusedField = .displayName }
                                 .onChange(of: discordUsername) { _, _ in modified = true }
                         }
 
@@ -83,6 +91,9 @@ struct ProfileView: View {
                                 .foregroundStyle(.secondary)
                             TextField("Display name", text: $displayName)
                                 .textFieldStyle(.roundedBorder)
+                                .focused($focusedField, equals: .displayName)
+                                .submitLabel(.done)
+                                .onSubmit { focusedField = nil }
                                 .onChange(of: displayName) { _, _ in modified = true }
                         }
                     }
@@ -90,6 +101,7 @@ struct ProfileView: View {
 
                     if modified {
                         Button {
+                            focusedField = nil
                             Task { await saveProfile() }
                         } label: {
                             HStack {
@@ -113,31 +125,34 @@ struct ProfileView: View {
                             .tracking(1.5)
                             .foregroundStyle(.secondary)
 
-                        LazyVGrid(columns: [.init(), .init()], spacing: 10) {
-                            StatBox(value: "\(tournamentsEntered)", label: "Tournaments", icon: "trophy")
-                            StatBox(value: "\(tournamentsWon)", label: "Wins", icon: "crown.fill")
-                            StatBox(value: "\(matchesWon)-\(matchesLost)", label: "Record", icon: "chart.bar.fill")
-                            StatBox(value: "\(totalVotes)", label: "Votes", icon: "hand.thumbsup.fill")
-                        }
+                        if statsLoaded {
+                            LazyVGrid(columns: [.init(), .init()], spacing: 10) {
+                                StatBox(value: "\(tournamentsEntered)", label: "Tournaments", icon: "trophy")
+                                StatBox(value: "\(tournamentsWon)", label: "Wins", icon: "crown.fill")
+                                StatBox(value: "\(matchesWon)-\(matchesLost)", label: "Record", icon: "chart.bar.fill")
+                                StatBox(value: "\(totalVotes)", label: "Votes", icon: "hand.thumbsup.fill")
+                            }
 
-                        // Win rate bar
-                        VStack(spacing: 4) {
-                            HStack {
-                                Text("Win Rate")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Text("\(Int(winRate * 100))%")
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.yellow)
-                            }
-                            GeometryReader { geo in
-                                ZStack(alignment: .leading) {
-                                    Capsule().fill(Color.gray.opacity(0.15)).frame(height: 8)
-                                    Capsule().fill(Color.yellow).frame(width: geo.size.width * winRate, height: 8)
+                            VStack(spacing: 4) {
+                                HStack {
+                                    Text("Win Rate")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(.secondary)
+                                    Spacer()
+                                    Text("\(Int(winRate * 100))%")
+                                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.yellow)
                                 }
+                                GeometryReader { geo in
+                                    ZStack(alignment: .leading) {
+                                        Capsule().fill(Color.gray.opacity(0.15)).frame(height: 8)
+                                        Capsule().fill(Color.yellow).frame(width: geo.size.width * winRate, height: 8)
+                                    }
+                                }
+                                .frame(height: 8)
                             }
-                            .frame(height: 8)
+                        } else {
+                            ProgressView().tint(.yellow).padding()
                         }
                     }
                     .padding()
@@ -147,7 +162,6 @@ struct ProfileView: View {
 
                     // Portfolio link
                     NavigationLink {
-                        // TODO: PortfolioManage
                         Text("Portfolio Editor coming soon")
                     } label: {
                         HStack {
@@ -195,6 +209,8 @@ struct ProfileView: View {
                     .padding(.bottom, 32)
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
+            .onTapGesture { focusedField = nil }
             .background(Color(.systemBackground))
             .navigationTitle("Profile")
             .task { await loadStats() }
@@ -216,9 +232,7 @@ struct ProfileView: View {
     }
 
     func loadStats() async {
-        guard let email = auth.profile?.email else { return }
         do {
-            // Get all matchups to compute W/L
             let matchups: [Matchup] = try await supabase.from("matchups")
                 .select()
                 .eq("status", value: "completed")
@@ -230,29 +244,28 @@ struct ProfileView: View {
                 .execute()
                 .value
 
-            // Find user's participant IDs
-            // For now, match by checking if any participant's tournament was created by this user
-            // This is a simplification — in production you'd track user_id on participant
-            let userParticipants = participants // simplified - show global stats
-            let userParticipantIds = Set(userParticipants.map { $0.id })
+            let userParticipantIds = Set(participants.map { $0.id })
+            tournamentsEntered = Set(participants.map { $0.tournamentId }).count
 
-            tournamentsEntered = Set(userParticipants.map { $0.tournamentId }).count
-
+            var w = 0, l = 0, v = 0
             for m in matchups {
-                if m.winnerId != nil {
-                    if let aId = m.participantAId, userParticipantIds.contains(aId) {
-                        if m.winnerId == aId { matchesWon += 1 } else { matchesLost += 1 }
-                        totalVotes += m.votesA
-                    }
-                    if let bId = m.participantBId, userParticipantIds.contains(bId) {
-                        if m.winnerId == bId { matchesWon += 1 } else { matchesLost += 1 }
-                        totalVotes += m.votesB
-                    }
+                guard m.winnerId != nil else { continue }
+                if let aId = m.participantAId, userParticipantIds.contains(aId) {
+                    if m.winnerId == aId { w += 1 } else { l += 1 }
+                    v += m.votesA
+                }
+                if let bId = m.participantBId, userParticipantIds.contains(bId) {
+                    if m.winnerId == bId { w += 1 } else { l += 1 }
+                    v += m.votesB
                 }
             }
+            matchesWon = w
+            matchesLost = l
+            totalVotes = v
         } catch {
             print("Failed to load stats: \(error)")
         }
+        statsLoaded = true
     }
 
     func saveProfile() async {
@@ -263,7 +276,6 @@ struct ProfileView: View {
                 "display_name": displayName,
             ]
 
-            // Upload avatar if changed
             if let image = avatarImage, let data = image.jpegData(compressionQuality: 0.8) {
                 let fileName = "avatars/\(auth.profile?.id.uuidString ?? "unknown").jpg"
                 try await supabase.storage.from("appwars").upload(fileName, data: data, options: .init(contentType: "image/jpeg", upsert: true))
