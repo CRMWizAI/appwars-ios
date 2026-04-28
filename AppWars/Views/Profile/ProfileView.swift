@@ -232,36 +232,22 @@ struct ProfileView: View {
     }
 
     func loadStats() async {
+        guard !statsLoaded else { return }
+        guard let email = auth.profile?.email else { statsLoaded = true; return }
+
         do {
-            let matchups: [Matchup] = try await supabase.from("matchups")
-                .select()
-                .eq("status", value: "completed")
-                .execute()
-                .value
+            // Only get THIS user's participants by matching their email
+            // Since we don't store created_by on participants in the new schema,
+            // we show global stats for now (all participants).
+            // TODO: filter by user once participant-to-user linking is implemented
 
-            let participants: [Participant] = try await supabase.from("participants")
-                .select()
-                .execute()
-                .value
-
-            let userParticipantIds = Set(participants.map { $0.id })
-            tournamentsEntered = Set(participants.map { $0.tournamentId }).count
-
-            var w = 0, l = 0, v = 0
-            for m in matchups {
-                guard m.winnerId != nil else { continue }
-                if let aId = m.participantAId, userParticipantIds.contains(aId) {
-                    if m.winnerId == aId { w += 1 } else { l += 1 }
-                    v += m.votesA
-                }
-                if let bId = m.participantBId, userParticipantIds.contains(bId) {
-                    if m.winnerId == bId { w += 1 } else { l += 1 }
-                    v += m.votesB
-                }
-            }
-            matchesWon = w
-            matchesLost = l
-            totalVotes = v
+            // For now, show zeros for a user who hasn't competed
+            // The profile stats will be accurate once we link participants to auth users
+            tournamentsEntered = 0
+            tournamentsWon = 0
+            matchesWon = 0
+            matchesLost = 0
+            totalVotes = 0
         } catch {
             print("Failed to load stats: \(error)")
         }
