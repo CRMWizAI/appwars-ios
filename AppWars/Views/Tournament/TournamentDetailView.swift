@@ -31,61 +31,62 @@ struct TournamentDetailView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-                // ── HERO BANNER (compact) ──
-                ZStack(alignment: .bottomLeading) {
-                    if let url = tournament.imageUrl, let imageURL = URL(string: url) {
-                        KFImage(imageURL)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(height: 140)
-                            .clipped()
-                            .overlay(
-                                LinearGradient(
-                                    stops: [
-                                        .init(color: .clear, location: 0),
-                                        .init(color: .black.opacity(0.5), location: 0.5),
-                                        .init(color: .black.opacity(0.95), location: 1),
-                                    ],
-                                    startPoint: .top, endPoint: .bottom
+                // ── HERO BANNER — only on Home tab ──
+                if selectedTab == 0 {
+                    ZStack(alignment: .bottomLeading) {
+                        if let url = tournament.imageUrl, let imageURL = URL(string: url) {
+                            KFImage(imageURL)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 140)
+                                .clipped()
+                                .overlay(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .clear, location: 0),
+                                            .init(color: .black.opacity(0.5), location: 0.5),
+                                            .init(color: .black.opacity(0.95), location: 1),
+                                        ],
+                                        startPoint: .top, endPoint: .bottom
+                                    )
                                 )
-                            )
-                    } else {
-                        LinearGradient(colors: [.yellow.opacity(0.3), .orange.opacity(0.2), .black], startPoint: .topTrailing, endPoint: .bottomLeading)
-                            .frame(height: 140)
-                    }
+                        } else {
+                            LinearGradient(colors: [.yellow.opacity(0.3), .orange.opacity(0.2), .black], startPoint: .topTrailing, endPoint: .bottomLeading)
+                                .frame(height: 140)
+                        }
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        // Presented by
-                        if let topSponsor = sponsors.first {
-                            HStack(spacing: 4) {
-                                Text("PRESENTED BY")
-                                    .font(.system(size: 8, weight: .heavy))
-                                    .tracking(1)
-                                Text(topSponsor.sponsorName)
-                                    .font(.system(size: 10, weight: .bold))
+                        VStack(alignment: .leading, spacing: 4) {
+                            if let topSponsor = sponsors.first {
+                                HStack(spacing: 4) {
+                                    Text("PRESENTED BY")
+                                        .font(.system(size: 8, weight: .heavy))
+                                        .tracking(1)
+                                    Text(topSponsor.sponsorName)
+                                        .font(.system(size: 10, weight: .bold))
+                                }
+                                .foregroundStyle(.yellow.opacity(0.7))
                             }
-                            .foregroundStyle(.yellow.opacity(0.7))
-                        }
 
-                        HStack(spacing: 8) {
-                            Text(tournament.name)
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
-                                .lineLimit(1)
-                            StatusBadge(status: tournament.status)
-                        }
-
-                        HStack(spacing: 12) {
-                            Label("\(tournament.playerCount ?? 0) builders", systemImage: "person.2.fill")
-                            if let endDate = tournament.roundEndDateParsed {
-                                RoundCountdown(endDate: endDate)
+                            HStack(spacing: 8) {
+                                Text(tournament.name)
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .lineLimit(1)
+                                StatusBadge(status: tournament.status)
                             }
+
+                            HStack(spacing: 12) {
+                                Label("\(tournament.playerCount ?? 0) builders", systemImage: "person.2.fill")
+                                if let endDate = tournament.roundEndDateParsed {
+                                    RoundCountdown(endDate: endDate)
+                                }
+                            }
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.6))
                         }
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .padding(.horizontal, 14)
+                        .padding(.bottom, 10)
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 10)
                 }
 
                 // ── TAB PILLS ──
@@ -120,30 +121,30 @@ struct TournamentDetailView: View {
                     }
                 }
 
-                // ── TAB CONTENT (swipeable) ──
-                TabView(selection: $selectedTab) {
-                    TournamentHomeTab(tournament: tournament, matchups: matchups, sponsors: sponsors)
-                        .tag(0)
-
-                    Group {
+                // ── TAB CONTENT ──
+                Group {
+                    switch selectedTab {
+                    case 0:
+                        TournamentHomeTab(tournament: tournament, matchups: matchups, sponsors: sponsors)
+                    case 1:
                         if loading {
                             VStack { Spacer(); ProgressView().tint(.yellow); Spacer() }
                         } else {
-                            SimpleBracketList(matchups: matchups, tournament: tournament)
+                            BracketView(matchups: matchups, tournament: tournament)
                         }
+                    case 2:
+                        VoteNowTab(tournament: tournament, matchups: matchups)
+                    case 3:
+                        ChatTab(tournamentId: tournament.id)
+                    case 4:
+                        SponsorsTab(tournamentId: tournament.id)
+                    case 5:
+                        PrizesTab(tournament: tournament)
+                    default:
+                        EmptyView()
                     }
-                    .tag(1)
-
-                    VoteNowTab(tournament: tournament, matchups: matchups)
-                        .tag(2)
-                    ChatTab(tournamentId: tournament.id)
-                        .tag(3)
-                    SponsorsTab(tournamentId: tournament.id)
-                        .tag(4)
-                    PrizesTab(tournament: tournament)
-                        .tag(5)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             // Pad bottom for marquee
             .padding(.bottom, sponsors.isEmpty ? 0 : 48)
