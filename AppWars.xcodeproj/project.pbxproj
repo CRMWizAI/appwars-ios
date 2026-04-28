@@ -22,6 +22,7 @@
 		3A80D48E429D6F68A5B4B4F8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = FE87FC919BACDB02644C9A2B /* Kingfisher */; };
 		4A7440377221DC1B773A04B5 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2219E08B9F9447104C2DF26A /* LeaderboardView.swift */; };
 		4C8104EFA677F554718C648B /* PrizesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD21C10598DD95EE654E7CF /* PrizesTab.swift */; };
+		69290F8996190118AC94BB84 /* DateHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E38E12D2D3FB1E8F7E07C8A /* DateHelpers.swift */; };
 		81413A60BE79189B30858009 /* ChampionCelebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 804CD5AE1023EF1B98757673 /* ChampionCelebration.swift */; };
 		84DEBFE9EC36D143E7710696 /* ShimmerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */; };
 		915D7E891938D4D24F56B0A7 /* RoundCountdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D788889D8821F4E4948149 /* RoundCountdown.swift */; };
@@ -38,7 +39,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		07CC7FAA0839FF2DBED6E118 /* AppWars.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		07CC7FAA0839FF2DBED6E118 /* AppWars.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AppWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CDFEFF485C6E015E463A1B6 /* SponsorsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsorsTab.swift; sourceTree = "<group>"; };
 		2219E08B9F9447104C2DF26A /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
 		2AD21C10598DD95EE654E7CF /* PrizesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrizesTab.swift; sourceTree = "<group>"; };
@@ -48,6 +49,7 @@
 		5ED3083C584BE42BCE233528 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		648E2EECFA5022632D9CBC5C /* VoteNowTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoteNowTab.swift; sourceTree = "<group>"; };
 		66DBBC4DE26EAE1212C87D96 /* TournamentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TournamentDetailView.swift; sourceTree = "<group>"; };
+		6E38E12D2D3FB1E8F7E07C8A /* DateHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelpers.swift; sourceTree = "<group>"; };
 		77D788889D8821F4E4948149 /* RoundCountdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCountdown.swift; sourceTree = "<group>"; };
 		804CD5AE1023EF1B98757673 /* ChampionCelebration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChampionCelebration.swift; sourceTree = "<group>"; };
 		822C686F841D18D68667B895 /* PortfolioManageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioManageView.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 		3B96D66C2805D17CCF9B16E9 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				6E38E12D2D3FB1E8F7E07C8A /* DateHelpers.swift */,
 				DC4B4AA4A17A4F1DCE92D39A /* ShimmerEffect.swift */,
 			);
 			path = Extensions;
@@ -290,6 +293,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = BF2877DAFC4B2E984D598830 /* Build configuration list for PBXProject "AppWars" */;
 			developmentRegion = en;
@@ -325,6 +330,7 @@
 				1305F29FF5E1B3191B92FA1F /* AuthService.swift in Sources */,
 				1D66EDDEC4FAF408A86733C5 /* BracketView.swift in Sources */,
 				81413A60BE79189B30858009 /* ChampionCelebration.swift in Sources */,
+				69290F8996190118AC94BB84 /* DateHelpers.swift in Sources */,
 				B90719AE57F846F3508C50E9 /* HomeView.swift in Sources */,
 				4A7440377221DC1B773A04B5 /* LeaderboardView.swift in Sources */,
 				1215068A89C9CA4D473F2F24 /* LoginView.swift in Sources */,
@@ -414,7 +420,6 @@
 				CODE_SIGN_ENTITLEMENTS = AppWars/AppWars.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N2F6R54U88;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = AppWars;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -503,7 +508,6 @@
 				CODE_SIGN_ENTITLEMENTS = AppWars/AppWars.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N2F6R54U88;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = AppWars;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

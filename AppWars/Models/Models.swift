@@ -7,7 +7,7 @@ struct Profile: Codable, Identifiable {
     var discordUsername: String?
     var displayName: String?
     var avatarUrl: String?
-    let createdAt: Date?
+    let createdAt: String?
 
     var isAdmin: Bool { role == "admin" }
 
@@ -28,17 +28,24 @@ struct Tournament: Codable, Identifiable {
     var status: String
     var currentRound: Int
     var totalRounds: Int?
-    var roundEndDate: Date?
+    var roundEndDate: String?
     var currentCategory: String?
     var playerCount: Int?
     var roundDurationHours: Int?
     var prizeTiers: Int?
     var prizes: [Prize]?
-    let createdAt: Date?
+    let createdAt: String?
 
     var isRegistration: Bool { status == "registration" }
     var isActive: Bool { status == "active" }
     var isCompleted: Bool { status == "completed" }
+
+    var roundEndDateParsed: Date? {
+        guard let str = roundEndDate else { return nil }
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f.date(from: str) ?? ISO8601DateFormatter().date(from: str)
+    }
 
     enum CodingKeys: String, CodingKey {
         case id, name, description, status, prizes
@@ -144,7 +151,7 @@ struct ChatMessage: Codable, Identifiable {
     var replyToId: UUID?
     var replyToAuthorName: String?
     var replyToContent: String?
-    let createdAt: Date?
+    let createdAt: String?
 
     enum CodingKeys: String, CodingKey {
         case id, content
@@ -165,7 +172,7 @@ struct AppNotification: Codable, Identifiable {
     let body: String
     var isRead: Bool
     var targetEmail: String?
-    let createdAt: Date?
+    let createdAt: String?
 
     enum CodingKeys: String, CodingKey {
         case id, title, body
@@ -190,9 +197,9 @@ struct TeamWar: Codable, Identifiable {
     var teams: [TeamInfo]?
     var currentRound: Int
     var currentCategory: String?
-    var roundEndDate: Date?
+    var roundEndDate: String?
     var winningTeamKey: String?
-    let createdAt: Date?
+    let createdAt: String?
 
     enum CodingKeys: String, CodingKey {
         case id, name, description, status, teams

@@ -67,7 +67,7 @@ struct TournamentDetailView: View {
             }
 
             // Round countdown
-            if let endDate = tournament.roundEndDate {
+            if let endDate = tournament.roundEndDateParsed {
                 HStack {
                     RoundCountdown(endDate: endDate)
                     Spacer()
@@ -202,8 +202,8 @@ struct ChatTab: View {
                                 HStack(spacing: 6) {
                                     Text(msg.authorName ?? "User")
                                         .font(.system(size: 12, weight: .semibold))
-                                    if let date = msg.createdAt {
-                                        Text(date, style: .relative)
+                                    if let dateStr = msg.createdAt {
+                                        Text(timeAgo(dateStr))
                                             .font(.system(size: 10))
                                             .foregroundStyle(.tertiary)
                                     }
