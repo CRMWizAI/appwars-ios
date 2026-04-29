@@ -51,10 +51,13 @@ struct BracketView: View {
                 bracketContent(layout: layout)
             }
         }
-        .task {
+        .onAppear {
             guard !ready else { return }
-            await computeOnBackground()
-            ready = true
+            let screenW = UIScreen.main.bounds.width
+            Task {
+                await computeOnBackground(screenWidth: screenW)
+                ready = true
+            }
         }
     }
 
@@ -175,7 +178,7 @@ struct BracketView: View {
     }
 
     // MARK: - Background computation
-    func computeOnBackground() async {
+    func computeOnBackground(screenWidth: CGFloat) async {
         let totalRounds = tournament.totalRounds ?? max(1, Int(ceil(log2(Double(max(matchups.count * 2, 2))))))
         let playerCount = Int(pow(2, Double(totalRounds)))
         let halfPlayers = playerCount / 2
@@ -183,7 +186,7 @@ struct BracketView: View {
         let totalW = CGFloat(halfPlayers) * 80
         let halfH = CGFloat(halfRounds) * 78 + 44
         let totalH = halfH * 2 + 70
-        let scale = min(1, UIScreen.main.bounds.width / totalW)
+        let scale = min(1, screenWidth / totalW)
 
         let layout = LayoutInfo(totalW: totalW, totalH: totalH, halfH: halfH,
                                 halfRounds: halfRounds, halfPlayers: halfPlayers, scale: scale)
