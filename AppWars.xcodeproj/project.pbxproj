@@ -42,7 +42,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		07CC7FAA0839FF2DBED6E118 /* AppWars.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		07CC7FAA0839FF2DBED6E118 /* AppWars.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AppWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CDFEFF485C6E015E463A1B6 /* SponsorsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsorsTab.swift; sourceTree = "<group>"; };
 		1BFD23246D571C912F3C7F44 /* SimpleBracketList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleBracketList.swift; sourceTree = "<group>"; };
 		2219E08B9F9447104C2DF26A /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
@@ -302,6 +302,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = BF2877DAFC4B2E984D598830 /* Build configuration list for PBXProject "AppWars" */;
 			developmentRegion = en;
@@ -430,7 +432,6 @@
 				CODE_SIGN_ENTITLEMENTS = AppWars/AppWars.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N2F6R54U88;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = AppWars;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -519,7 +520,6 @@
 				CODE_SIGN_ENTITLEMENTS = AppWars/AppWars.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N2F6R54U88;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = AppWars;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
